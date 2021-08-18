@@ -225,16 +225,17 @@ t.test('basic', t => {
     })
 
     t.same(JSON.parse(response.body), {
-      // data: {
-      //   message: null,
-      //   messages: null,
-      //   nestedMessages: null
-      // },
-      // errors: [
-      //   { message: 'Variable "$id" got invalid value ""; Expected type "ID". Failed validation check on id', path: ['message'], locations: [{ line: 2, column: 7 }] },
-      //   { message: 'Variable "$text" got invalid value ""; Expected type "String". Failed validation check on text', path: ['messages'], locations: [{ line: 7, column: 7 }] },
-      //   { message: 'Variable "$text" got invalid value ""; Expected type "String". Failed validation check on text', path: ['nestedMessages'], locations: [{ line: 12, column: 7 }] }
-      // ]
+      data: {
+        message: null,
+        messages: null,
+        nestedMessages: null
+      },
+      errors: [
+        // TODO: set correct error messages
+        { message: 'Oh no!', path: ['message'], locations: [{ line: 2, column: 7 }] },
+        { message: 'Oh no!', path: ['messages'], locations: [{ line: 7, column: 7 }] },
+        { message: 'Oh no!', path: ['nestedMessages'], locations: [{ line: 12, column: 7 }] }
+      ]
     })
   })
 
