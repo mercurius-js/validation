@@ -12,11 +12,13 @@ const plugin = fp(
     const validation = new Validation(opts)
 
     // Override resolvers with validation handlers
-    validation.registerValidationHandlers(app.graphql.schema)
+    // TODO: validate policy
+    const validationPolicy = opts.validation ?? {}
+    validation.registerValidationPolicy(app.graphql.schema, validationPolicy)
 
     // Add hook to regenerate the resolvers when the schema is refreshed
     app.graphql.addHook('onGatewayReplaceSchema', async (instance, schema) => {
-      validation.registerValidationHandlers(schema)
+      validation.registerValidationPolicy(schema)
     })
   },
   {

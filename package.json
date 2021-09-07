@@ -1,6 +1,6 @@
 {
   "name": "mercurius-validation",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "description": "Mercurius Validation Plugin adds configurable Validation support to Mercurius.",
   "main": "index.js",
   "types": "index.d.ts",
@@ -15,14 +15,24 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jonnydgreen/mercurius-validation.git"
+    "url": "git+https://github.com/mercurius-js/validation.git"
   },
   "author": "Jonny Green <hello@jonnydgreen.com>",
+  "contributors": [
+    {
+      "name": "Matteo Collina",
+      "email": "hello@matteocollina.com"
+    },
+    {
+      "name": "Simone Sanfratello",
+      "email": "simone@braceslab.com"
+    }
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jonnydgreen/mercurius-validation/issues"
+    "url": "https://github.com/mercurius-js/validation/issues"
   },
-  "homepage": "https://github.com/jonnydgreen/mercurius-validation",
+  "homepage": "https://github.com/mercurius-js/validation",
   "devDependencies": {
     "@sinonjs/fake-timers": "^7.0.5",
     "@types/node": "^16.0.0",
@@ -42,12 +52,10 @@
     "wait-on": "^6.0.0"
   },
   "dependencies": {
-    "@graphql-tools/utils": "^8.0.2",
-    "fastify-error": "^0.3.0",
+    "ajv": "^8.6.2",
+    "fastify-error": "^0.3.1",
     "fastify-plugin": "^3.0.0",
-    "graphql": "^15.4.0",
-    "graphql-scalars": "^1.10.0",
-    "validator": "^13.6.0"
+    "graphql": "^15.4.0"
   },
   "tsd": {
     "directory": "./test/types"
