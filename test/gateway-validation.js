@@ -139,7 +139,7 @@ async function createTestGatewayServer (t, validationOptions) {
     }
   })
 
-  gateway.register(mercuriusValidation, validationOptions ?? {
+  gateway.register(mercuriusValidation, validationOptions || {
     schema: {
       User: {
         topPosts: {

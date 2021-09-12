@@ -21,7 +21,7 @@ const schema = `
   }
 
   type Query {
-    message(id: Int): Message
+    message(id: Int unused: Int): Message
     messages(filters: Filters, nestedFilters: NestedFilters): [Message]
   }
 `
@@ -90,7 +90,7 @@ t.test('Function validators', t => {
     })
 
     const query = `query {
-      message(id: 1) {
+      message(id: 1, unused: 1) {
         id
         text
       }
