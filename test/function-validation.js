@@ -4,6 +4,7 @@ const t = require('tap')
 const Fastify = require('fastify')
 const mercurius = require('mercurius')
 const mercuriusValidation = require('..')
+const { GraphQLSchema } = require('graphql')
 
 const schema = `
   type Message {
@@ -55,11 +56,11 @@ const resolvers = {
   }
 }
 
-t.test('basic with policy', t => {
-  t.plan(2)
+t.test('Function validators', t => {
+  t.plan(3)
 
   t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
-    t.plan(2)
+    t.plan(9)
 
     const app = Fastify()
     t.teardown(app.close.bind(app))
@@ -69,12 +70,18 @@ t.test('basic with policy', t => {
       resolvers
     })
     app.register(mercuriusValidation, {
-      validation: {
+      schema: {
         Query: {
           message: {
-            id: async () => {
-              // TODO: maybe add some extra checks here
+            id: async (metadata, argumentValue, parent, args, context, info) => {
               t.ok('should be called')
+              t.same(metadata, { type: 'Query', field: 'message', argument: 'id' })
+              t.equal(argumentValue, 1)
+              t.type(parent, 'object')
+              t.type(args, 'object')
+              t.type(context, 'object')
+              t.type(info, 'object')
+              t.type(info.schema, GraphQLSchema)
               return true
             }
           }
@@ -129,7 +136,7 @@ t.test('basic with policy', t => {
   })
 
   t.test('should protect the schema arguments and error accordingly', async (t) => {
-    t.plan(2)
+    t.plan(4)
 
     const app = Fastify()
     t.teardown(app.close.bind(app))
@@ -139,12 +146,13 @@ t.test('basic with policy', t => {
       resolvers
     })
     app.register(mercuriusValidation, {
-      validation: {
+      schema: {
         Query: {
           message: {
-            id: async () => {
-              // TODO: maybe add some extra checks here
+            id: async (metadata, argumentValue) => {
               t.ok('should be called')
+              t.same(metadata, { type: 'Query', field: 'message', argument: 'id' })
+              t.equal(argumentValue, 32768)
               const error = new Error('kaboom')
               error.data = 'kaboom data'
               throw error
@@ -163,7 +171,93 @@ t.test('basic with policy', t => {
 
     const response = await app.inject({
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'X-User': 'user' },
+      headers: { 'content-type': 'application/json' },
+      url: '/graphql',
+      body: JSON.stringify({ query })
+    })
+
+    t.same(JSON.parse(response.body), {
+      data: {
+        message: null
+      },
+      errors: [
+        {
+          message: "Failed Validation on arguments for field 'Query.message'",
+          locations: [{
+            line: 2,
+            column: 7
+          }],
+          path: [
+            'message'
+          ],
+          extensions: {
+            code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+            name: 'ValidationError',
+            details: [
+              {
+                data: 'kaboom data'
+              }
+            ]
+          }
+        }
+      ]
+    })
+  })
+
+  t.test('should handle when validation is mismatched with the schema and not affect existing functionality', async (t) => {
+    t.plan(4)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    app.register(mercurius, {
+      schema,
+      resolvers
+    })
+    app.register(mercuriusValidation, {
+      schema: {
+        Wrong: {
+          text: {
+            arg: async () => {
+              t.fail('should not be called when type name is wrong')
+            }
+          }
+        },
+        Message: {
+          wrong: {
+            arg: async () => {
+              t.fail('should not be called when field name is wrong')
+            }
+          }
+        },
+        Query: {
+          message: {
+            id: async (metadata, argumentValue) => {
+              t.ok('should be called')
+              t.same(metadata, { type: 'Query', field: 'message', argument: 'id' })
+              t.equal(argumentValue, 32768)
+              const error = new Error('kaboom')
+              error.data = 'kaboom data'
+              throw error
+            },
+            wrong: async () => {
+              t.fail('should not be called when arg name is wrong')
+            }
+          }
+        }
+      }
+    })
+
+    const query = `query {
+      message(id: 32768) {
+        id
+        text
+      }
+    }`
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
       url: '/graphql',
       body: JSON.stringify({ query })
     })

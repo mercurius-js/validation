@@ -3,22 +3,22 @@
 const fp = require('fastify-plugin')
 const Validation = require('./lib/validation')
 const { validateOpts } = require('./lib/utils')
+const { validationDirective, validationTypeDefs, validationTypes } = require('./lib/directive')
+const errors = require('./lib/errors')
 
-const plugin = fp(
+const mercuriusValidation = fp(
   async function (app, opts) {
-    validateOpts(opts)
+    // Validate options
+    const validatedOpts = validateOpts(opts)
 
     // Start validation and register hooks
-    const validation = new Validation(opts)
+    const validation = new Validation(app, validatedOpts)
 
-    // Override resolvers with validation handlers
-    // TODO: validate policy
-    const validationPolicy = opts.validation ?? {}
-    validation.registerValidationPolicy(app.graphql.schema, validationPolicy)
+    validation.registerValidationSchema(app.graphql.schema)
 
     // Add hook to regenerate the resolvers when the schema is refreshed
     app.graphql.addHook('onGatewayReplaceSchema', async (instance, schema) => {
-      validation.registerValidationPolicy(schema)
+      validation.registerValidationSchema(schema)
     })
   },
   {
@@ -28,4 +28,9 @@ const plugin = fp(
   }
 )
 
-module.exports = plugin
+mercuriusValidation.graphQLDirective = validationDirective
+mercuriusValidation.graphQLTypeDefs = validationTypeDefs
+mercuriusValidation.graphQLTypes = validationTypes
+mercuriusValidation.errors = errors
+
+module.exports = mercuriusValidation
