@@ -73,7 +73,7 @@ const resolvers = {
 }
 
 t.test('With directives', t => {
-  t.plan(5)
+  t.plan(8)
 
   t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
     t.plan(1)
@@ -595,4 +595,10 @@ t.test('With directives', t => {
       })
     }
   })
+
+  t.todo('should protect schema list scalar types and error accordingly')
+
+  t.todo('should protect schema list input object types and error accordingly')
+
+  t.todo('should protect schema non-null types and error accordingly')
 })
