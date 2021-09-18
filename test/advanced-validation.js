@@ -15,7 +15,7 @@ const schema = `
 
   input Filters {
     id: ID
-    text: String @constraint(minLength: 1)
+    text: String
   }
 
   input NestedFilters {
@@ -23,8 +23,8 @@ const schema = `
   }
 
   input ArrayFilters {
-    values: [String] @constraint(minItems: 1)
-    filters: [Filters] @constraint(minItems: 1)
+    values: [String]
+    filters: [Filters]
   }
 
   type Query {
@@ -72,9 +72,9 @@ t.test('Advanced', t => {
   t.plan(2)
 
   t.test('when mode is JSON Schema', t => {
-    t.plan(1)
+    t.plan(2)
 
-    t.test('should all work together', async (t) => {
+    t.test('should all work independently together', async (t) => {
       t.plan(1)
 
       const app = Fastify()
@@ -86,6 +86,9 @@ t.test('Advanced', t => {
       })
       app.register(mercuriusValidation, {
         schema: {
+          Filters: {
+            text: { minLength: 1 }
+          },
           ArrayFilters: {
             values: { type: 'array', minItems: 2 }
           },
@@ -107,9 +110,17 @@ t.test('Advanced', t => {
           text
         }
         messages(
-          filters: { text: ""}
-          nestedFilters: { input: { text: ""} }
+          filters: { text: "" }
+          arrayObjectFilters: [
+            { values: [] }, { values: ["hello", "there"] }
+          ]
+        ) {
+          id
+          text
+        }
+        directiveMessages: messages(
           arrayScalarFilters: [""]
+          arrayObjectFilters: []
         ) {
           id
           text
@@ -126,7 +137,8 @@ t.test('Advanced', t => {
       t.same(JSON.parse(response.body), {
         data: {
           message: null,
-          messages: null
+          messages: null,
+          directiveMessages: null
         },
         errors: [
           {
@@ -154,28 +166,49 @@ t.test('Advanced', t => {
                   message: 'must NOT have fewer than 1 characters',
                   schema: 1,
                   parentSchema: {
-                    type: 'string',
                     minLength: 1,
+                    type: 'string',
                     $id: 'https://mercurius.dev/validation/Filters/text'
                   },
                   data: ''
                 },
                 {
-                  instancePath: '/nestedFilters/input/text',
-                  schemaPath: 'https://mercurius.dev/validation/Filters/properties/text/minLength',
-                  keyword: 'minLength',
+                  instancePath: '/arrayObjectFilters/0/values',
+                  schemaPath: '#/properties/values/minItems',
+                  keyword: 'minItems',
                   params: {
-                    limit: 1
+                    limit: 2
                   },
-                  message: 'must NOT have fewer than 1 characters',
-                  schema: 1,
+                  message: 'must NOT have fewer than 2 items',
+                  schema: 2,
                   parentSchema: {
-                    type: 'string',
-                    minLength: 1,
-                    $id: 'https://mercurius.dev/validation/Filters/text'
+                    minItems: 2,
+                    type: 'array',
+                    $id: 'https://mercurius.dev/validation/ArrayFilters/values',
+                    items: {
+                      type: 'string'
+                    }
                   },
-                  data: ''
-                },
+                  data: []
+                }
+              ]
+            }
+          },
+          {
+            message: "Failed Validation on arguments for field 'Query.messages'",
+            locations: [
+              {
+                line: 15,
+                column: 9
+              }
+            ],
+            path: [
+              'directiveMessages'
+            ],
+            extensions: {
+              code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+              name: 'ValidationError',
+              details: [
                 {
                   instancePath: '/arrayScalarFilters',
                   schemaPath: '#/properties/arrayScalarFilters/minItems',
@@ -196,6 +229,25 @@ t.test('Advanced', t => {
                   data: [
                     ''
                   ]
+                },
+                {
+                  instancePath: '/arrayObjectFilters',
+                  schemaPath: '#/properties/arrayObjectFilters/minItems',
+                  keyword: 'minItems',
+                  params: {
+                    limit: 1
+                  },
+                  message: 'must NOT have fewer than 1 items',
+                  schema: 1,
+                  parentSchema: {
+                    minItems: 1,
+                    $id: 'https://mercurius.dev/validation/Query/messages/arrayObjectFilters',
+                    type: 'array',
+                    items: {
+                      $ref: 'https://mercurius.dev/validation/ArrayFilters'
+                    }
+                  },
+                  data: []
                 }
               ]
             }
@@ -226,11 +278,201 @@ t.test('Advanced', t => {
         ]
       })
     })
+
+    t.todo('should all work together on the same fields')
   })
 
   t.test('when mode is JTD', t => {
-    t.plan(1)
+    t.plan(2)
 
-    t.todo('all validators should work together')
+    t.test('should all work independently together', async (t) => {
+      t.plan(1)
+
+      const app = Fastify()
+      t.teardown(app.close.bind(app))
+
+      app.register(mercurius, {
+        schema,
+        resolvers
+      })
+      app.register(mercuriusValidation, {
+        mode: 'JTD',
+        schema: {
+          Filters: {
+            text: { enum: ['hello', 'there'] }
+          },
+          Query: {
+            message: {
+              id: async () => {
+                const error = new Error('kaboom')
+                error.details = ['kaboom']
+                throw error
+              }
+            }
+          }
+        }
+      })
+
+      const query = `query {
+        message(id: "1") {
+          id
+          text
+        }
+        messages(
+          filters: { text: "" }
+        ) {
+          id
+          text
+        }
+        directiveMessages: messages(
+          arrayScalarFilters: [""]
+          arrayObjectFilters: []
+        ) {
+          id
+          text
+        }
+      }`
+
+      const response = await app.inject({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        url: '/graphql',
+        body: JSON.stringify({ query })
+      })
+
+      t.same(JSON.parse(response.body), {
+        data: {
+          message: null,
+          messages: null,
+          directiveMessages: null
+        },
+        errors: [
+          {
+            message: "Failed Validation on arguments for field 'Query.messages'",
+            locations: [
+              {
+                line: 6,
+                column: 9
+              }
+            ],
+            path: [
+              'messages'
+            ],
+            extensions: {
+              code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+              name: 'ValidationError',
+              details: [
+                {
+                  instancePath: '/filters/text',
+                  schemaPath: '/definitions/Filters/optionalProperties/text/enum',
+                  keyword: 'enum',
+                  params: {
+                    allowedValues: [
+                      'hello',
+                      'there'
+                    ]
+                  },
+                  message: 'must be equal to one of the allowed values',
+                  schema: [
+                    'hello',
+                    'there'
+                  ],
+                  parentSchema: {
+                    enum: [
+                      'hello',
+                      'there'
+                    ]
+                  },
+                  data: ''
+                }
+              ]
+            }
+          },
+          {
+            message: "Failed Validation on arguments for field 'Query.messages'",
+            locations: [
+              {
+                line: 12,
+                column: 9
+              }
+            ],
+            path: [
+              'directiveMessages'
+            ],
+            extensions: {
+              code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+              name: 'ValidationError',
+              details: [
+                {
+                  instancePath: '/arrayScalarFilters',
+                  schemaPath: '#/properties/arrayScalarFilters/minItems',
+                  keyword: 'minItems',
+                  params: {
+                    limit: 2
+                  },
+                  message: 'must NOT have fewer than 2 items',
+                  schema: 2,
+                  parentSchema: {
+                    minItems: 2,
+                    type: 'array',
+                    $id: 'https://mercurius.dev/validation/Query/messages/arrayScalarFilters',
+                    items: {
+                      type: 'string'
+                    }
+                  },
+                  data: [
+                    ''
+                  ]
+                },
+                {
+                  instancePath: '/arrayObjectFilters',
+                  schemaPath: '#/properties/arrayObjectFilters/minItems',
+                  keyword: 'minItems',
+                  params: {
+                    limit: 1
+                  },
+                  message: 'must NOT have fewer than 1 items',
+                  schema: 1,
+                  parentSchema: {
+                    minItems: 1,
+                    $id: 'https://mercurius.dev/validation/Query/messages/arrayObjectFilters',
+                    type: 'array',
+                    items: {
+                      $ref: 'https://mercurius.dev/validation/ArrayFilters'
+                    }
+                  },
+                  data: []
+                }
+              ]
+            }
+          },
+          {
+            message: "Failed Validation on arguments for field 'Query.message'",
+            locations: [
+              {
+                line: 2,
+                column: 9
+              }
+            ],
+            path: [
+              'message'
+            ],
+            extensions: {
+              code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+              name: 'ValidationError',
+              details: [
+                {
+                  details: [
+                    'kaboom'
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      })
+    })
+
+    t.todo('should all work together on the same fields')
   })
 })

@@ -68,7 +68,7 @@ const resolvers = {
 }
 
 t.test('JTD validators', t => {
-  t.plan(8)
+  t.plan(9)
 
   t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
     t.plan(1)
@@ -928,6 +928,182 @@ t.test('JTD validators', t => {
                   type: 'int16'
                 },
                 data: 32768
+              }
+            ]
+          }
+        }
+      ]
+    })
+  })
+
+  t.test('should support custom AJV options', async t => {
+    t.plan(1)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    const schema = `
+      type Message {
+        id: ID!
+        text: String
+      }
+
+      input Filters {
+        id: ID
+        text: String!
+      }
+
+      input NestedFilters {
+        input: Filters!
+      }
+
+      input ArrayFilters {
+        values: [String!]!
+        filters: [Filters!]!
+      }
+
+      type Query {
+        message(id: ID!): Message
+        messages(
+          filters: Filters!
+          nestedFilters: NestedFilters!
+          arrayScalarFilters: [String!]!
+          arrayObjectFilters: [ArrayFilters!]!
+        ): [Message]
+      }
+    `
+
+    app.register(mercurius, {
+      schema,
+      resolvers
+    })
+    app.register(mercuriusValidation, {
+      mode: 'JTD',
+      allErrors: false,
+      schema: {
+        Filters: {
+          text: { enum: ['hello', 'there'] }
+        },
+        Query: {
+          message: {
+            id: { enum: ['hello', 'there'] }
+          },
+          messages: {
+            arrayScalarFilters: {
+              elements: { enum: ['hello', 'there'] }
+            }
+          }
+        }
+      }
+    })
+
+    const query = `query {
+      message(id: "") {
+        id
+        text
+      }
+      messages(
+        filters: { text: ""}
+        nestedFilters: { input: { text: ""} }
+        arrayScalarFilters: [""]
+        arrayObjectFilters: [{ values: [""], filters: { text: "" }}]
+      ) {
+        id
+        text
+      }
+    }`
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      url: '/graphql',
+      body: JSON.stringify({ query })
+    })
+
+    t.same(JSON.parse(response.body), {
+      data: {
+        message: null,
+        messages: null
+      },
+      errors: [
+        {
+          message: "Failed Validation on arguments for field 'Query.message'",
+          locations: [
+            {
+              line: 2,
+              column: 7
+            }
+          ],
+          path: [
+            'message'
+          ],
+          extensions: {
+            code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+            name: 'ValidationError',
+            details: [
+              {
+                instancePath: '/id',
+                schemaPath: '/optionalProperties/id/enum',
+                keyword: 'enum',
+                params: {
+                  allowedValues: [
+                    'hello',
+                    'there'
+                  ]
+                },
+                message: 'must be equal to one of the allowed values',
+                schema: [
+                  'hello',
+                  'there'
+                ],
+                parentSchema: {
+                  enum: [
+                    'hello',
+                    'there'
+                  ]
+                },
+                data: ''
+              }
+            ]
+          }
+        },
+        {
+          message: "Failed Validation on arguments for field 'Query.messages'",
+          locations: [
+            {
+              line: 6,
+              column: 7
+            }
+          ],
+          path: [
+            'messages'
+          ],
+          extensions: {
+            code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+            name: 'ValidationError',
+            details: [
+              {
+                instancePath: '/filters/text',
+                schemaPath: '/definitions/Filters/optionalProperties/text/enum',
+                keyword: 'enum',
+                params: {
+                  allowedValues: [
+                    'hello',
+                    'there'
+                  ]
+                },
+                message: 'must be equal to one of the allowed values',
+                schema: [
+                  'hello',
+                  'there'
+                ],
+                parentSchema: {
+                  enum: [
+                    'hello',
+                    'there'
+                  ]
+                },
+                data: ''
               }
             ]
           }

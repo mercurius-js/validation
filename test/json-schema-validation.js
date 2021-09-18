@@ -69,7 +69,7 @@ const resolvers = {
 }
 
 t.test('JSON Schema validators', t => {
-  t.plan(13)
+  t.plan(14)
 
   t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
     t.plan(1)
@@ -1672,6 +1672,86 @@ t.test('JSON Schema validators', t => {
                   minimum: 1
                 },
                 data: 0
+              }
+            ]
+          }
+        }
+      ]
+    })
+  })
+
+  t.test('should support additional AJV options', async t => {
+    t.plan(1)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    app.register(mercurius, {
+      schema,
+      resolvers
+    })
+    app.register(mercuriusValidation, {
+      formats: {
+        base64: /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
+      },
+      schema: {
+        Query: {
+          message: {
+            id: { type: 'string', format: 'base64' }
+          }
+        }
+      }
+    })
+
+    const query = `query {
+      message(id: "not-base-64") {
+        id
+        text
+      }
+    }`
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      url: '/graphql',
+      body: JSON.stringify({ query })
+    })
+
+    t.same(JSON.parse(response.body), {
+      data: {
+        message: null
+      },
+      errors: [
+        {
+          message: "Failed Validation on arguments for field 'Query.message'",
+          locations: [
+            {
+              line: 2,
+              column: 7
+            }
+          ],
+          path: [
+            'message'
+          ],
+          extensions: {
+            code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+            name: 'ValidationError',
+            details: [
+              {
+                instancePath: '/id',
+                schemaPath: '#/properties/id/format',
+                keyword: 'format',
+                params: {
+                  format: 'base64'
+                },
+                message: 'must match format "base64"',
+                schema: 'base64',
+                parentSchema: {
+                  type: 'string',
+                  format: 'base64',
+                  $id: 'https://mercurius.dev/validation/Query/message/id'
+                },
+                data: 'not-base-64'
               }
             ]
           }

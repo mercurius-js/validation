@@ -9,11 +9,11 @@ const { MER_VALIDATION_ERR_INVALID_OPTS } = require('../lib/errors')
 
 const schema = `
   directive @constraint(
-    regex: String
+    pattern: String
   ) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
   type Mutation {
-    sendMessage(text: String @constraint(regex: "^[A-Za-z0-9 ]$")): String
+    sendMessage(text: String @constraint(pattern: "^[A-Za-z0-9 ]$")): String
   }
 `
 
