@@ -3,7 +3,7 @@
 const fp = require('fastify-plugin')
 const Validation = require('./lib/validation')
 const { validateOpts } = require('./lib/utils')
-const { validationDirective, validationTypeDefs, validationTypes } = require('./lib/directive')
+const { validationDirective, validationTypeDefs } = require('./lib/directive')
 const errors = require('./lib/errors')
 
 const mercuriusValidation = fp(
@@ -30,7 +30,6 @@ const mercuriusValidation = fp(
 
 mercuriusValidation.graphQLDirective = validationDirective
 mercuriusValidation.graphQLTypeDefs = validationTypeDefs
-mercuriusValidation.graphQLTypes = validationTypes
 mercuriusValidation.errors = errors
 
 module.exports = mercuriusValidation

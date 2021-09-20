@@ -69,7 +69,7 @@ const resolvers = {
 }
 
 t.test('JSON Schema validators', t => {
-  t.plan(14)
+  t.plan(16)
 
   t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
     t.plan(1)
@@ -879,6 +879,192 @@ t.test('JSON Schema validators', t => {
                   $id: 'https://mercurius.dev/validation/Query/noResolver/id',
                   type: 'string',
                   minLength: 1
+                },
+                data: ''
+              }
+            ]
+          }
+        }
+      ]
+    })
+  })
+
+  t.test('should protect at the input object type level and error accordingly', async t => {
+    t.plan(1)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    app.register(mercurius, {
+      schema,
+      resolvers
+    })
+    app.register(mercuriusValidation, {
+      schema: {
+        Filters: {
+          __typeValidation: {
+            minProperties: 1
+          }
+        }
+      }
+    })
+
+    const query = `query {
+      messages(filters: {}) {
+        id
+        text
+      }
+    }`
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      url: '/graphql',
+      body: JSON.stringify({ query })
+    })
+
+    t.same(JSON.parse(response.body), {
+      data: {
+        messages: null
+      },
+      errors: [
+        {
+          message: "Failed Validation on arguments for field 'Query.messages'",
+          locations: [
+            {
+              line: 2,
+              column: 7
+            }
+          ],
+          path: [
+            'messages'
+          ],
+          extensions: {
+            code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+            name: 'ValidationError',
+            details: [
+              {
+                instancePath: '/filters',
+                schemaPath: 'https://mercurius.dev/validation/Filters/minProperties',
+                keyword: 'minProperties',
+                params: {
+                  limit: 1
+                },
+                message: 'must NOT have fewer than 1 items',
+                schema: 1,
+                parentSchema: {
+                  minProperties: 1,
+                  $id: 'https://mercurius.dev/validation/Filters',
+                  type: 'object',
+                  properties: {
+                    text: {
+                      type: 'string',
+                      $id: 'https://mercurius.dev/validation/Filters/text'
+                    }
+                  }
+                },
+                data: {}
+              }
+            ]
+          }
+        }
+      ]
+    })
+  })
+
+  t.test('should protect at the input object type level alongside existing field validations and error accordingly', async t => {
+    t.plan(1)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    app.register(mercurius, {
+      schema,
+      resolvers
+    })
+    app.register(mercuriusValidation, {
+      schema: {
+        Filters: {
+          __typeValidation: {
+            minProperties: 2
+          },
+          text: { minLength: 1 }
+        }
+      }
+    })
+
+    const query = `query {
+      messages(filters: { text: "" }) {
+        id
+        text
+      }
+    }`
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      url: '/graphql',
+      body: JSON.stringify({ query })
+    })
+
+    t.same(JSON.parse(response.body), {
+      data: {
+        messages: null
+      },
+      errors: [
+        {
+          message: "Failed Validation on arguments for field 'Query.messages'",
+          locations: [
+            {
+              line: 2,
+              column: 7
+            }
+          ],
+          path: [
+            'messages'
+          ],
+          extensions: {
+            code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+            name: 'ValidationError',
+            details: [
+              {
+                instancePath: '/filters',
+                schemaPath: 'https://mercurius.dev/validation/Filters/minProperties',
+                keyword: 'minProperties',
+                params: {
+                  limit: 2
+                },
+                message: 'must NOT have fewer than 2 items',
+                schema: 2,
+                parentSchema: {
+                  minProperties: 2,
+                  $id: 'https://mercurius.dev/validation/Filters',
+                  type: 'object',
+                  properties: {
+                    text: {
+                      minLength: 1,
+                      type: 'string',
+                      $id: 'https://mercurius.dev/validation/Filters/text'
+                    }
+                  }
+                },
+                data: {
+                  text: ''
+                }
+              },
+              {
+                instancePath: '/filters/text',
+                schemaPath: 'https://mercurius.dev/validation/Filters/properties/text/minLength',
+                keyword: 'minLength',
+                params: {
+                  limit: 1
+                },
+                message: 'must NOT have fewer than 1 characters',
+                schema: 1,
+                parentSchema: {
+                  minLength: 1,
+                  type: 'string',
+                  $id: 'https://mercurius.dev/validation/Filters/text'
                 },
                 data: ''
               }

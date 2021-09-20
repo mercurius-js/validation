@@ -28,9 +28,9 @@ const schema = `
   }
 
   type Query {
-    message(id: ID): Message
+    message(id: ID @constraint(type: "string" format: "uuid")): Message
     messages(
-      filters: Filters @constraint
+      filters: Filters
       nestedFilters: NestedFilters
       arrayScalarFilters: [String] @constraint(minItems: 2)
       arrayObjectFilters: [ArrayFilters] @constraint(minItems: 1)
@@ -279,7 +279,142 @@ t.test('Advanced', t => {
       })
     })
 
-    t.todo('should all work together on the same fields')
+    t.test('directive validation should run after in-band validation', async t => {
+      t.plan(2)
+
+      const app = Fastify()
+      t.teardown(app.close.bind(app))
+
+      app.register(mercurius, {
+        schema,
+        resolvers
+      })
+      app.register(mercuriusValidation, {
+        schema: {
+          Query: {
+            message: {
+              id: { type: 'string', minLength: 1 }
+            }
+          }
+        }
+      })
+
+      {
+        const query = `query {
+          message(id: "") {
+            id
+            text
+          }
+        }`
+
+        const response = await app.inject({
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          url: '/graphql',
+          body: JSON.stringify({ query })
+        })
+
+        t.same(JSON.parse(response.body), {
+          data: {
+            message: null
+          },
+          errors: [
+            {
+              message: "Failed Validation on arguments for field 'Query.message'",
+              locations: [
+                {
+                  line: 2,
+                  column: 11
+                }
+              ],
+              path: [
+                'message'
+              ],
+              extensions: {
+                code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+                name: 'ValidationError',
+                details: [
+                  {
+                    instancePath: '/id',
+                    schemaPath: '#/properties/id/minLength',
+                    keyword: 'minLength',
+                    params: {
+                      limit: 1
+                    },
+                    message: 'must NOT have fewer than 1 characters',
+                    schema: 1,
+                    parentSchema: {
+                      type: 'string',
+                      minLength: 1,
+                      $id: 'https://mercurius.dev/validation/Query/message/id'
+                    },
+                    data: ''
+                  }
+                ]
+              }
+            }
+          ]
+        })
+      }
+
+      {
+        const query = `query {
+          message(id: "not-uuid") {
+            id
+            text
+          }
+        }`
+
+        const response = await app.inject({
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          url: '/graphql',
+          body: JSON.stringify({ query })
+        })
+
+        t.same(JSON.parse(response.body), {
+          data: {
+            message: null
+          },
+          errors: [
+            {
+              message: "Failed Validation on arguments for field 'Query.message'",
+              locations: [
+                {
+                  line: 2,
+                  column: 11
+                }
+              ],
+              path: [
+                'message'
+              ],
+              extensions: {
+                code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+                name: 'ValidationError',
+                details: [
+                  {
+                    instancePath: '/id',
+                    schemaPath: '#/properties/id/format',
+                    keyword: 'format',
+                    params: {
+                      format: 'uuid'
+                    },
+                    message: 'must match format "uuid"',
+                    schema: 'uuid',
+                    parentSchema: {
+                      type: 'string',
+                      format: 'uuid',
+                      $id: 'https://mercurius.dev/validation/Query/message/id'
+                    },
+                    data: 'not-uuid'
+                  }
+                ]
+              }
+            }
+          ]
+        })
+      }
+    })
   })
 
   t.test('when mode is JTD', t => {
@@ -473,6 +608,149 @@ t.test('Advanced', t => {
       })
     })
 
-    t.todo('should all work together on the same fields')
+    t.test('directive validation should run after in-band validation', async t => {
+      t.plan(2)
+
+      const app = Fastify()
+      t.teardown(app.close.bind(app))
+
+      app.register(mercurius, {
+        schema,
+        resolvers
+      })
+      app.register(mercuriusValidation, {
+        mode: 'JTD',
+        schema: {
+          Query: {
+            message: {
+              id: { enum: ['hello', 'there'] }
+            }
+          }
+        }
+      })
+
+      {
+        const query = `query {
+          message(id: "wrong") {
+            id
+            text
+          }
+        }`
+
+        const response = await app.inject({
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          url: '/graphql',
+          body: JSON.stringify({ query })
+        })
+
+        t.same(JSON.parse(response.body), {
+          data: {
+            message: null
+          },
+          errors: [
+            {
+              message: "Failed Validation on arguments for field 'Query.message'",
+              locations: [
+                {
+                  line: 2,
+                  column: 11
+                }
+              ],
+              path: [
+                'message'
+              ],
+              extensions: {
+                code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+                name: 'ValidationError',
+                details: [
+                  {
+                    instancePath: '/id',
+                    schemaPath: '/optionalProperties/id/enum',
+                    keyword: 'enum',
+                    params: {
+                      allowedValues: [
+                        'hello',
+                        'there'
+                      ]
+                    },
+                    message: 'must be equal to one of the allowed values',
+                    schema: [
+                      'hello',
+                      'there'
+                    ],
+                    parentSchema: {
+                      enum: [
+                        'hello',
+                        'there'
+                      ]
+                    },
+                    data: 'wrong'
+                  }
+                ]
+              }
+            }
+          ]
+        })
+      }
+
+      {
+        const query = `query {
+          message(id: "hello") {
+            id
+            text
+          }
+        }`
+
+        const response = await app.inject({
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          url: '/graphql',
+          body: JSON.stringify({ query })
+        })
+
+        t.same(JSON.parse(response.body), {
+          data: {
+            message: null
+          },
+          errors: [
+            {
+              message: "Failed Validation on arguments for field 'Query.message'",
+              locations: [
+                {
+                  line: 2,
+                  column: 11
+                }
+              ],
+              path: [
+                'message'
+              ],
+              extensions: {
+                code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+                name: 'ValidationError',
+                details: [
+                  {
+                    instancePath: '/id',
+                    schemaPath: '#/properties/id/format',
+                    keyword: 'format',
+                    params: {
+                      format: 'uuid'
+                    },
+                    message: 'must match format "uuid"',
+                    schema: 'uuid',
+                    parentSchema: {
+                      type: 'string',
+                      format: 'uuid',
+                      $id: 'https://mercurius.dev/validation/Query/message/id'
+                    },
+                    data: 'hello'
+                  }
+                ]
+              }
+            }
+          ]
+        })
+      }
+    })
   })
 })

@@ -68,7 +68,7 @@ const resolvers = {
 }
 
 t.test('JTD validators', t => {
-  t.plan(9)
+  t.plan(10)
 
   t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
     t.plan(1)
@@ -818,42 +818,6 @@ t.test('JTD validators', t => {
                   ]
                 },
                 data: ''
-              },
-              {
-                instancePath: '/arrayObjectFilters/0/values',
-                schemaPath: '/definitions/ArrayFilters',
-                keyword: 'optionalProperties',
-                params: {
-                  error: 'additional',
-                  additionalProperty: 'values'
-                },
-                message: 'must NOT have additional properties',
-                schema: {
-                  filters: {
-                    elements: {
-                      ref: 'Filters'
-                    }
-                  }
-                },
-                parentSchema: {
-                  optionalProperties: {
-                    filters: {
-                      elements: {
-                        ref: 'Filters'
-                      }
-                    }
-                  }
-                },
-                data: {
-                  values: [
-                    ''
-                  ],
-                  filters: [
-                    {
-                      text: ''
-                    }
-                  ]
-                }
               }
             ]
           }
@@ -928,6 +892,102 @@ t.test('JTD validators', t => {
                   type: 'int16'
                 },
                 data: 32768
+              }
+            ]
+          }
+        }
+      ]
+    })
+  })
+
+  t.test('should protect at the input object type level and error accordingly', async t => {
+    t.plan(1)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    const schema = `
+      type Message {
+        id: ID!
+        text: String
+      }
+
+      input Filters {
+        id: ID
+      }
+
+      type Query {
+        noResolver(id: Int): Int
+        message(id: Int): Message
+        messages(filters: Filters): [Message]
+      }
+`
+
+    app.register(mercurius, {
+      schema,
+      resolvers
+    })
+    app.register(mercuriusValidation, {
+      mode: 'JTD',
+      schema: {
+        Filters: {
+          __typeValidation: {
+            values: {
+              type: 'uint8'
+            }
+          }
+        }
+      }
+    })
+
+    const query = `query {
+      messages(filters: { id: 256 }) {
+        id
+        text
+      }
+    }`
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      url: '/graphql',
+      body: JSON.stringify({ query })
+    })
+
+    t.same(JSON.parse(response.body), {
+      data: {
+        messages: null
+      },
+      errors: [
+        {
+          message: "Failed Validation on arguments for field 'Query.messages'",
+          locations: [
+            {
+              line: 2,
+              column: 7
+            }
+          ],
+          path: [
+            'messages'
+          ],
+          extensions: {
+            code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+            name: 'ValidationError',
+            details: [
+              {
+                instancePath: '/filters/id',
+                schemaPath: '/definitions/Filters/values/type',
+                keyword: 'type',
+                params: {
+                  type: 'uint8',
+                  nullable: false
+                },
+                message: 'must be uint8',
+                schema: 'uint8',
+                parentSchema: {
+                  type: 'uint8'
+                },
+                data: '256'
               }
             ]
           }
