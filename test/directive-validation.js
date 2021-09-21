@@ -73,7 +73,7 @@ const resolvers = {
 }
 
 t.test('With directives', t => {
-  t.plan(25)
+  t.plan(26)
 
   t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
     t.plan(1)
@@ -1209,84 +1209,175 @@ t.test('With directives', t => {
   })
 
   t.test('should support the JSON Schema "type" input and error accordingly', async t => {
-    t.plan(1)
+    t.plan(2)
 
-    const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.test('should support a single type', async t => {
+      t.plan(1)
 
-    const schema = `
-      ${mercuriusValidation.graphQLTypeDefs}
+      const app = Fastify()
+      t.teardown(app.close.bind(app))
 
-      type Message {
-        id: ID
-        text: String
-      }
-
-      type Query {
-        message(id: ID @constraint(type: "number")): Message
-        messages: [Message]
-      }
-    `
-
-    app.register(mercurius, {
-      schema,
-      resolvers
-    })
-    app.register(mercuriusValidation)
-
-    const query = `query {
-      message(id: "not-number") {
-        id
-        text
-      }
-    }`
-
-    const response = await app.inject({
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      url: '/graphql',
-      body: JSON.stringify({ query })
-    })
-
-    t.same(JSON.parse(response.body), {
-      data: {
-        message: null
-      },
-      errors: [
-        {
-          message: "Failed Validation on arguments for field 'Query.message'",
-          locations: [
-            {
-              line: 2,
-              column: 7
-            }
-          ],
-          path: [
-            'message'
-          ],
-          extensions: {
-            code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
-            name: 'ValidationError',
-            details: [
-              {
-                instancePath: '/id',
-                schemaPath: '#/properties/id/type',
-                keyword: 'type',
-                params: {
-                  type: 'number'
-                },
-                message: 'must be number',
-                schema: 'number',
-                parentSchema: {
-                  type: 'number',
-                  $id: 'https://mercurius.dev/validation/Query/message/id'
-                },
-                data: 'not-number'
-              }
-            ]
-          }
+      const schema = `
+        ${mercuriusValidation.graphQLTypeDefs}
+  
+        type Message {
+          id: ID
+          text: String
         }
-      ]
+  
+        type Query {
+          message(id: ID @constraint(type: "number")): Message
+          messages: [Message]
+        }
+      `
+
+      app.register(mercurius, {
+        schema,
+        resolvers
+      })
+      app.register(mercuriusValidation)
+
+      const query = `query {
+        message(id: "not-number") {
+          id
+          text
+        }
+      }`
+
+      const response = await app.inject({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        url: '/graphql',
+        body: JSON.stringify({ query })
+      })
+
+      t.same(JSON.parse(response.body), {
+        data: {
+          message: null
+        },
+        errors: [
+          {
+            message: "Failed Validation on arguments for field 'Query.message'",
+            locations: [
+              {
+                line: 2,
+                column: 9
+              }
+            ],
+            path: [
+              'message'
+            ],
+            extensions: {
+              code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+              name: 'ValidationError',
+              details: [
+                {
+                  instancePath: '/id',
+                  schemaPath: '#/properties/id/type',
+                  keyword: 'type',
+                  params: {
+                    type: 'number'
+                  },
+                  message: 'must be number',
+                  schema: 'number',
+                  parentSchema: {
+                    type: 'number',
+                    $id: 'https://mercurius.dev/validation/Query/message/id'
+                  },
+                  data: 'not-number'
+                }
+              ]
+            }
+          }
+        ]
+      })
+    })
+
+    t.test('should support multiple types', async t => {
+      t.plan(1)
+
+      const app = Fastify()
+      t.teardown(app.close.bind(app))
+
+      const schema = `
+        ${mercuriusValidation.graphQLTypeDefs}
+  
+        type Message {
+          id: ID
+          text: String
+        }
+  
+        type Query {
+          message(id: ID @constraint(type: ["number", "integer"])): Message
+          messages: [Message]
+        }
+      `
+
+      app.register(mercurius, {
+        schema,
+        resolvers
+      })
+      app.register(mercuriusValidation)
+
+      const query = `query {
+        message(id: "not-number") {
+          id
+          text
+        }
+      }`
+
+      const response = await app.inject({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        url: '/graphql',
+        body: JSON.stringify({ query })
+      })
+
+      t.same(JSON.parse(response.body), {
+        data: {
+          message: null
+        },
+        errors: [
+          {
+            message:
+              "Failed Validation on arguments for field 'Query.message'",
+            locations: [
+              {
+                line: 2,
+                column: 9
+              }
+            ],
+            path: ['message'],
+            extensions: {
+              code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+              name: 'ValidationError',
+              details: [
+                {
+                  instancePath: '/id',
+                  schemaPath: '#/properties/id/type',
+                  keyword: 'type',
+                  params: {
+                    type: ['number', 'integer']
+                  },
+                  message: 'must be number,integer',
+                  schema: [
+                    'number',
+                    'integer'
+                  ],
+                  parentSchema: {
+                    type: [
+                      'number',
+                      'integer'
+                    ],
+                    $id: 'https://mercurius.dev/validation/Query/message/id'
+                  },
+                  data: 'not-number'
+                }
+              ]
+            }
+          }
+        ]
+      })
     })
   })
 
@@ -2473,6 +2564,112 @@ t.test('With directives', t => {
                   '1',
                   '1'
                 ]
+              }
+            ]
+          }
+        }
+      ]
+    })
+  })
+
+  t.test('should support the custom "schema" input for unsupported JSON schemas and error accordingly', async t => {
+    t.plan(1)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    const idValidationSchema = JSON.stringify({
+      items: { type: 'integer' }
+    }).replace(/"/g, '\\"')
+
+    const schema = `
+      ${mercuriusValidation.graphQLTypeDefs}
+
+      type Message {
+        id: ID
+        text: String
+      }
+
+      type Query {
+        message(id: ID): Message
+        messages(ids: [ID] @constraint(minItems: 2 schema: "${idValidationSchema}")): [Message]
+      }
+    `
+
+    app.register(mercurius, {
+      schema,
+      resolvers
+    })
+    app.register(mercuriusValidation)
+
+    const query = `query {
+      messages(ids: ["1.1"]) {
+        id
+        text
+      }
+    }`
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      url: '/graphql',
+      body: JSON.stringify({ query })
+    })
+
+    t.same(JSON.parse(response.body), {
+      data: {
+        messages: null
+      },
+      errors: [
+        {
+          message: "Failed Validation on arguments for field 'Query.messages'",
+          locations: [
+            {
+              line: 2,
+              column: 7
+            }
+          ],
+          path: [
+            'messages'
+          ],
+          extensions: {
+            code: 'MER_VALIDATION_ERR_FAILED_VALIDATION',
+            name: 'ValidationError',
+            details: [
+              {
+                instancePath: '/ids',
+                schemaPath: '#/properties/ids/minItems',
+                keyword: 'minItems',
+                params: {
+                  limit: 2
+                },
+                message: 'must NOT have fewer than 2 items',
+                schema: 2,
+                parentSchema: {
+                  minItems: 2,
+                  items: {
+                    type: 'integer'
+                  },
+                  $id: 'https://mercurius.dev/validation/Query/messages/ids',
+                  type: 'array'
+                },
+                data: [
+                  '1.1'
+                ]
+              },
+              {
+                instancePath: '/ids/0',
+                schemaPath: '#/properties/ids/items/type',
+                keyword: 'type',
+                params: {
+                  type: 'integer'
+                },
+                message: 'must be integer',
+                schema: 'integer',
+                parentSchema: {
+                  type: 'integer'
+                },
+                data: '1.1'
               }
             ]
           }

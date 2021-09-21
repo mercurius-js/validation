@@ -57,8 +57,10 @@ const posts = {
 async function createTestGatewayServer (t, validationOptions) {
   // User service
   const userServiceSchema = `
+    ${mercuriusValidation.graphQLTypeDefs}
+
     type Query @extends {
-      me(id: Int): User
+      me(id: Int @constraint(minimum: 1)): User
     }
 
     type User @key(fields: "id") {
@@ -83,13 +85,15 @@ async function createTestGatewayServer (t, validationOptions) {
 
   // Post service
   const postServiceSchema = `
+    ${mercuriusValidation.graphQLTypeDefs}
+
     type Post @key(fields: "pid") {
       pid: ID!
       author: User
     }
 
     extend type Query {
-      topPosts(count: Int): [Post]
+      topPosts(count: Int @constraint(minimum: 1)): [Post]
     }
 
     type User @key(fields: "id") @extends {
@@ -142,14 +146,6 @@ async function createTestGatewayServer (t, validationOptions) {
   gateway.register(mercuriusValidation, validationOptions || {
     schema: {
       User: {
-        topPosts: {
-          count: { type: 'integer', minimum: 1 }
-        }
-      },
-      Query: {
-        me: {
-          id: { type: 'integer', minimum: 1 }
-        },
         topPosts: {
           count: { type: 'integer', minimum: 1 }
         }

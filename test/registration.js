@@ -107,6 +107,6 @@ t.test('registrations', t => {
     })
     await app.register(mercuriusValidation)
 
-    t.ok('mercurius auth plugin is registered without options')
+    t.ok('mercurius validation plugin is registered without options')
   })
 })

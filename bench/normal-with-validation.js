@@ -2,7 +2,7 @@
 
 const Fastify = require('fastify')
 const mercurius = require('mercurius')
-const mercuriusAuth = require('..')
+const mercuriusValidation = require('..')
 const { schema, resolvers } = require('./normal-setup')
 
 const app = Fastify()
@@ -14,7 +14,7 @@ app.register(mercurius, {
   jit: 1
 })
 
-app.register(mercuriusAuth, {
+app.register(mercuriusValidation, {
   schema: {
     Filters: {
       text: { type: 'string', minLength: 1 }

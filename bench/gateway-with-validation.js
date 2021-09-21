@@ -2,7 +2,7 @@
 
 const Fastify = require('fastify')
 const mercurius = require('mercurius')
-const mercuriusAuth = require('..')
+const mercuriusValidation = require('..')
 
 const app = Fastify()
 
@@ -20,7 +20,7 @@ app.register(mercurius, {
   jit: 1
 })
 
-app.register(mercuriusAuth, {
+app.register(mercuriusValidation, {
   schema: {
     User: {
       topPosts: {
