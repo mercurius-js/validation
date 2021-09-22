@@ -7,7 +7,7 @@
   "scripts": {
     "unit": "tap --100 test/*.js",
     "cov": "tap --coverage-report=html -J test/*.js",
-    "lint": "npm run lint:standard && npm run lint:typescript",
+    "lint": "npm run lint:standard",
     "lint:standard": "standard | snazzy",
     "lint:typescript": "standard --parser @typescript-eslint/parser --plugin @typescript-eslint/eslint-plugin index.d.ts test/types/*.ts | snazzy",
     "typescript": "tsd",
@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "ajv": "^8.6.2",
+    "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
     "fastify-error": "^0.3.1",
     "fastify-plugin": "^3.0.0",

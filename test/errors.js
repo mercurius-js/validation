@@ -1,7 +1,7 @@
 'use strict'
 
 const t = require('tap')
-const { errors } = require('..')
+const errors = require('../lib/errors')
 
 t.test('errors', t => {
   t.plan(1)

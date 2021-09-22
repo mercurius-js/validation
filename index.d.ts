@@ -1,8 +1,11 @@
-import { FastifyPluginAsync } from 'fastify'
-import { GraphQLResolveInfo } from 'graphql'
+import { FastifyInstance } from 'fastify'
+import { GraphQLDirective, GraphQLResolveInfo } from 'graphql'
 import { MercuriusContext } from 'mercurius'
 import { Options, SchemaObject } from 'ajv'
 
+/**
+ * GraphQL metadata associated with the argument validation.
+ */
 export interface MercuriusValidationHandlerMetadata {
   /**
    * The name of the associated GraphQL type.
@@ -31,26 +34,61 @@ export type MercuriusValidationHandler<TParent = any, TArgs = any, TContext = Me
   info: GraphQLResolveInfo
 ) => Promise<void>;
 
+/**
+ * Mercurius Validation argument definition. Accepts JSON Schema, JTD or custom function.
+ */
 export type MercuriusValidationArgument<TParent = any, TArgs = any, TContext = MercuriusContext> = |
   SchemaObject |
   MercuriusValidationHandler<TParent, TArgs, TContext>;
 
+/**
+ * Mercurius Validation field definition. Accepts argument definition, JSON Schema or JTD.
+ */
 export type MercuriusValidationField<TParent = any, TArgs = any, TContext = MercuriusContext> = Record<string, MercuriusValidationArgument<TParent, TArgs, TContext>> | SchemaObject
 
+/**
+ * Mercurius Validation type definition. Accepts field definition and/or type validation definition.
+ */
 export type MercuriusValidationType<TParent = any, TArgs = any, TContext = MercuriusContext> = Record<string, MercuriusValidationField<TParent, TArgs, TContext>> & {
+  /**
+   * Define a validation schema here to validate the GraphQL input object type.
+   */
   __typeValidation?: SchemaObject
 }
 
+/**
+ * Mercurius Validation schema. Each key corresponds to a GraphQL type name.
+ */
 export type MercuriusValidationSchema<TParent = any, TArgs = any, TContext = MercuriusContext> = Record<string, MercuriusValidationType<TParent, TArgs, TContext>>
 
+/**
+ * The modes of operation available when interpreting Mercurius validation schemas.
+ */
 export type MercuriusValidationMode = 'JSONSchema' | 'JTD'
 
+/**
+ * Mercurius validation options.
+ */
 export interface MercuriusValidationOptions<TParent = any, TArgs = any, TContext = MercuriusContext> extends Options {
+  /**
+   * The mode of operation to use when interpreting Mercurius validation schemas.
+   */
   mode?: MercuriusValidationMode;
+  /**
+   * The validation schema definition for the Mercurius GraphQL server.
+   */
   schema?: MercuriusValidationSchema<TParent, TArgs, TContext>;
 }
 
-/** Mercurius Validation is a plugin for `mercurius` that adds configurable validation support. */
-declare const mercuriusValidation: FastifyPluginAsync<MercuriusValidationOptions>
+export default MercuriusValidation
 
-export default mercuriusValidation
+/** Mercurius Validation is a plugin for `mercurius` that adds configurable validation support. */
+declare function MercuriusValidation (
+  instance: FastifyInstance,
+  opts: MercuriusValidationOptions
+): void;
+
+declare namespace MercuriusValidation {
+  export const graphQLTypeDefs: string
+  export const graphQLDirective: GraphQLDirective
+}
