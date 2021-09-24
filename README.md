@@ -23,6 +23,10 @@ Features:
 - [Examples](#examples)
 - [Benchmarks](#benchmarks)
 - [API](docs/api/options.md)
+- [JSON Schema Validation](docs/json-schema-validation.md)
+- [JTD Validation](docs/jtd-validation.md)
+- [Function Validation](docs/function-validation.md)
+- [Directive Validation](docs/directive-validation.md)
 
 ## Install
 

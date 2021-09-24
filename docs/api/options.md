@@ -8,12 +8,12 @@
 <!-- TODO -->
 **mercurius-validation** supports the following options:
 
-Extends: [`Options`](https://ajv.js.org/options.html)
+Extends: [`AJVOptions`](https://ajv.js.org/options.html)
 
 * **mode** `"JSONSchema" | "JTD"` (optional, default: `JSONSchema`) - the validation mode of the plugin. This is used to specify the type of schema that needs to be compiled.
 * **schema** `MercuriusValidationSchema` (optional) - the validation schema definition that the plugin with run. One can define JSON Schema or JTD definitions for GraphQL types, fields and arguments or functions for GraphQL arguments.
 
-It extends the [AJV options](https://ajv.js.org/options.html). These can be used to register additional `formats` and provide further customization to the AJV validation behavior for example.
+It extends the [AJV options](https://ajv.js.org/options.html). These can be used to register additional `formats` for example and provide further customization to the AJV validation behavior.
 
 ### Parameter: `MercuriusValidationSchema`
 
@@ -62,7 +62,7 @@ We would use the key: `text`:
 
 ### Parameter: `MercuriusValidationSchemaField`
 
-The field definition is different from GraphQL Input Object types and GraphQL Object types.
+The field definition is different for GraphQL Input Object types and GraphQL Object types.
 
 #### GraphQL Input Object Types
 
@@ -109,19 +109,19 @@ Arguments:
 
 #### Parameter: `MercuriusValidationFunctionMetadata`
 
-* **type** `string` - the name of the GraphQL type.
-* **field** `string` - the name of the GraphQL field.
-* **argument** `string` - the name of the GraphQL argument.
+* **type** `string` - the name of the associated GraphQL type.
+* **field** `string` - the name of the associated GraphQL field.
+* **argument** `string` - the name of the associated GraphQL argument.
 
 Returns: `void`
 
 ### Parameter: `JSONSchema`
 
-The [JSON Schema](https://json-schema.org/understanding-json-schema/) schema definition for the input object type.
+The [JSON Schema](https://json-schema.org/understanding-json-schema/) schema definition for the input object type, type field or field argument.
 
 ### Parameter: `JTD`
 
-The [JTD](https://jsontypedef.com/docs/) schema definition for the input object type field.
+The [JTD](https://jsontypedef.com/docs/) schema definition for the input object type, type field or field argument.
 
 ## Registration
 

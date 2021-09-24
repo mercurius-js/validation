@@ -1,49 +1,59 @@
-# JSON Schema validation
+# Directive validation
 
-By default, Mercurius validation runs in JSON Schema mode when defining in-band validation schemas. It supports the following validation definitions:
+By default, Mercurius validation supports `@constraint` Directives out of the box. It is defined as follows:
 
-- Validation on GraphQL field arguments
-- Validation on Input Object type fields
-- Validation on Input Object types
+```gql
+directive @constraint(
+  maximum: Int
+  minimum: Int
+  exclusiveMaximum: Int
+  exclusiveMinimum: Int
+  multipleOf: Int
+  maxLength: Int
+  minLength: Int
+  pattern: String
+  maxProperties: Int
+  minProperties: Int
+  required: [String!]
+  maxItems: Int
+  minItems: Int
+  uniqueItems: Boolean
+  type: [String!]
+  format: String
+  schema: String
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | INPUT_OBJECT
+```
 
-When defining validations for each of the above, any valid JSON Schema keyword is supported.
+Every argument of the constraint directive is corresponds with its JSON Schema keyword equivalent and exhibits the same behavior. You can find the JSON Schema documentation [here](https://json-schema.org/understanding-json-schema/). At the moment, we have restricted to primitive types only, but we plan to support more keywords in the future.
 
-## GraphQL argument validation
+You can define this constraint at the following locations:
 
-For the following GraphQL schema:
+- `ARGUMENT_DEFINITION`
+- `INPUT_FIELD_DEFINITION`
+- `INPUT_OBJECT`
+
+For example:
 
 ```gql
 type Query {
-  message(id: ID): String
+  message(id: ID @constraint(type: "string", minLength: 1)): String
 }
 ```
 
-You can define JSON Schema validation on the `Query.message.id` argument as follows:
+To get up and running, you can even register the plugin without options (it also works alongside JSON Schema, JTD and function validators).
 
 ```js
-app.register(mercuriusValidation, {
-  schema: {
-    Query: {
-      message: {
-        id: { ... } // Any valid JSON Schema definition
-      }
-    }
-  }
-})
+app.register(mercuriusValidation)
 ```
 
-For example, if we wanted to check the minimum length of the ID input:
+## GraphQL argument validation
 
-```js
-app.register(mercuriusValidation, {
-  schema: {
-    Query: {
-      message: {
-        id: { type: 'string', minLength: 1 }
-      }
-    }
-  }
-})
+If we wanted to make sure the `id` argument had a minimum length of 1, we would define as follows:
+
+```gql
+type Query {
+  message(id: ID @constraint(type: "string", minLength: 1)): String
+}
 ```
 
 Upon failure(s), an example GraphQL response will look like:
@@ -94,40 +104,16 @@ Upon failure(s), an example GraphQL response will look like:
 
 ## GraphQL Input Object type field validation
 
-For the following GraphQL schema:
+We would define the schema as follows if we wanted to check the length of the `text` field on the `Filters` input object type:
 
 ```gql
 input Filters {
-  text: String
+  text: String @constraint(minLength: 1)
 }
 
 type Query {
   messages(filters: Filters): String
 }
-```
-
-You can define JSON Schema validation on the `Filters.text` input object type field as follows:
-
-```js
-app.register(mercuriusValidation, {
-  schema: {
-    Filters: {
-      text: { ... } // Any valid JSON Schema definition
-    }
-  }
-})
-```
-
-For example, if we wanted to check the minimum length of the text input:
-
-```js
-app.register(mercuriusValidation, {
-  schema: {
-    Filters: {
-      text: { type: 'string', minLength: 1 }
-    }
-  }
-})
 ```
 
 Upon failure(s), an example GraphQL response will look like:
@@ -176,40 +162,16 @@ Upon failure(s), an example GraphQL response will look like:
 
 ## GraphQL Input Object type validation
 
-For the following GraphQL schema:
+We would define the schema as follows if we wanted to check the number of properties on the `Filters` input object type:
 
 ```gql
-input Filters {
+input Filters @constraint(minProperties: 1) {
   text: String
 }
 
 type Query {
   messages(filters: Filters): String
 }
-```
-
-You can define JSON Schema validation on the `Filters` input object type using the reserved `__typeValidation` field as follows:
-
-```js
-app.register(mercuriusValidation, {
-  schema: {
-    Filters: {
-      __typeValidation: { ... } // Any valid JSON Schema definition
-    }
-  }
-})
-```
-
-For example, if we wanted to check the minimum number of properties of the Filters input object type:
-
-```js
-app.register(mercuriusValidation, {
-  schema: {
-    Filters: {
-      __typeValidation: { minProperties: 1 }
-    }
-  }
-})
 ```
 
 Upon failure(s), an example GraphQL response will look like:
@@ -266,29 +228,12 @@ Upon failure(s), an example GraphQL response will look like:
 
 If you need to provide additional AJV options, such providing custom formats, we can provide these at plugin registration:
 
-For the schema:
+We would define the schema as follows if we wanted to ensure the `id` argument was in a `base64` format:
 
 ```gql
 type Query {
-  message(id: ID): String
+  message(id: ID @constraint(type: "string", minLength: 1, format: "base64")): String
 }
-```
-
-For registering a new `"base64"` format:
-
-```js
-app.register(mercuriusValidation, {
-  formats: {
-    base64: /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
-  },
-  schema: {
-    Query: {
-      message: {
-        id: { type: 'string', format: 'base64' }
-      }
-    }
-  }
-})
 ```
 
 When run, this would produce the following validation error when an input is not base64:
@@ -337,45 +282,33 @@ When run, this would produce the following validation error when an input is not
 }
 ```
 
-## Custom errors
+## Unsupported JSON Schema keywords
 
-Within the plugin, we have also included the `ajv-errors` package. This adds the `errorMessage` keyword. You can use this to augment the error messages of your individual schemas.
+If we do not yet support a JSON Schema keyword, you can use the `schema` argument as a workaround.
 
-For the schema:
+For example, if we wanted to use the `items` keyword, we would define the schema as follows:
 
 ```gql
+type Message {
+  id: ID
+  text: String
+}
+
 type Query {
-  message(id: ID): String
+  messages(ids: [ID] @constraint(schema: "{\"items\":{\"type\":\"integer\"}}")): [Message]
 }
 ```
 
-For registering a new `"base64"` format and custom error:
-
-```js
-app.register(mercuriusValidation, {
-  formats: {
-    base64: /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
-  },
-  schema: {
-    Query: {
-      message: {
-        id: { type: 'string', format: 'base64', errorMessage: 'Input is not valid base64.' }
-      }
-    }
-  }
-})
-```
-
-An error would produce the following:
+We would get the following GraphQL response upon an error(s):
 
 ```json
 {
   "data": {
-    "message": null
+    "messages": null
   },
-  errors: [
+  "errors": [
     {
-      "message": "Failed Validation on arguments for field 'Query.message'",
+      "message": "Failed Validation on arguments for field 'Query.messages'",
       "locations": [
         {
           "line": 2,
@@ -383,53 +316,25 @@ An error would produce the following:
         }
       ],
       "path": [
-        "message"
+        "messages"
       ],
       "extensions": {
         "code": "MER_VALIDATION_ERR_FAILED_VALIDATION",
         "name": "ValidationError",
         "details": [
           {
-            "instancePath": "/id",
-            "schemaPath": "#/properties/id/errorMessage",
-            "keyword": "errorMessage",
+            "instancePath": "/ids/0",
+            "schemaPath": "#/properties/ids/items/type",
+            "keyword": "type",
             "params": {
-              "errors": [
-                {
-                  "instancePath": "/id",
-                  "schemaPath": "#/properties/id/format",
-                  "keyword": "format",
-                  "params": {
-                    "format": "base64"
-                  },
-                  "message": "must match format \"base64\"",
-                  "schema": "base64",
-                  "parentSchema": {
-                    "type": "string",
-                    "format": "base64",
-                    "errorMessage": {
-                      "format": "Input must be in base64 format."
-                    },
-                    "$id": "https://mercurius.dev/validation/Query/message/id"
-                  },
-                  "data": "not-base-64",
-                  "emUsed": true
-                }
-              ]
+              "type": "integer"
             },
-            "message": "Input must be in base64 format.",
-            "schema": {
-              "format": "Input must be in base64 format."
-            },
+            "message": "must be integer",
+            "schema": "integer",
             "parentSchema": {
-              "type": "string",
-              "format": "base64",
-              "errorMessage": {
-                "format": "Input must be in base64 format."
-              },
-              "$id": "https://mercurius.dev/validation/Query/message/id"
+              "type": "integer"
             },
-            "data": "not-base-64"
+            "data": "1.1"
           }
         ]
       }
@@ -437,39 +342,3 @@ An error would produce the following:
   ]
 }
 ```
-
-## Type inference
-
-For some GraphQL primitives, we can infer the JSON Schema type:
-
-- `GraphQLString` <=> `{ type: 'string' }`
-- `GraphQLInt` <=> `{ type: 'integer' }`
-- `GraphQLFloat` <=> `{ type: 'number' }`
-
-In these cases, we don't necessarily need to specify this type when building the JSON schema.
-
-For the schema:
-
-```gql
-type Query {
-  message(id: String): String
-}
-```
-
-Registration:
-
-```js
-app.register(mercuriusValidation, {
-  schema: {
-    Query: {
-      message: {
-        id: { minLength: 1 }
-      }
-    }
-  }
-})
-```
-
-## Caveats
-
-The use of the `$ref` keyword is not advised because we use this through the plugin to build up the GraphQL type validation. However, we have not prevented use of this keyword since it may be useful in some situations.
