@@ -27,7 +27,7 @@ const resolvers = {
 }
 
 t.test('registrations', t => {
-  t.plan(5)
+  t.plan(7)
 
   t.test('registration - should error if mercurius is not loaded', async (t) => {
     t.plan(1)
@@ -58,6 +58,40 @@ t.test('registrations', t => {
     t.rejects(
       app.register(mercuriusValidation, { schema: 'string' }),
       new MER_VALIDATION_ERR_INVALID_OPTS('opts.schema must be an object.')
+    )
+  })
+
+  t.test('registration - should error if mode is defined but not a string', async (t) => {
+    t.plan(1)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    app.register(mercurius, {
+      schema,
+      resolvers
+    })
+
+    t.rejects(
+      app.register(mercuriusValidation, { mode: 123456 }),
+      new MER_VALIDATION_ERR_INVALID_OPTS('opts.mode must be a string.')
+    )
+  })
+
+  t.test('registration - should error if directiveValidation is defined but not a boolean', async (t) => {
+    t.plan(1)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    app.register(mercurius, {
+      schema,
+      resolvers
+    })
+
+    t.rejects(
+      app.register(mercuriusValidation, { directiveValidation: 'string' }),
+      new MER_VALIDATION_ERR_INVALID_OPTS('opts.directiveValidation must be a boolean.')
     )
   })
 

@@ -23,6 +23,10 @@ app.register(mercuriusValidation, {
 app.register(mercuriusValidation, { mode: 'JTD' })
 app.register(mercuriusValidation, { mode: 'JSONSchema' })
 
+// Turn directive validation on/off
+app.register(mercuriusValidation, { directiveValidation: true })
+app.register(mercuriusValidation, { directiveValidation: false })
+
 // Register JSON Schema definitions
 app.register(mercuriusValidation, {
   mode: 'JSONSchema',

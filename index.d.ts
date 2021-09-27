@@ -71,13 +71,17 @@ export type MercuriusValidationMode = 'JSONSchema' | 'JTD'
  */
 export interface MercuriusValidationOptions<TParent = any, TArgs = any, TContext = MercuriusContext> extends Options {
   /**
-   * The mode of operation to use when interpreting Mercurius validation schemas.
+   * The mode of operation to use when interpreting Mercurius validation schemas (default: `"JSONSchema"`).
    */
   mode?: MercuriusValidationMode;
   /**
    * The validation schema definition for the Mercurius GraphQL server.
    */
   schema?: MercuriusValidationSchema<TParent, TArgs, TContext>;
+  /**
+   * Turn directive validation on or off (default: `true`).
+   */
+  directiveValidation?: boolean;
 }
 
 export default MercuriusValidation

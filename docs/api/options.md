@@ -10,8 +10,9 @@
 
 Extends: [`AJVOptions`](https://ajv.js.org/options.html)
 
-* **mode** `"JSONSchema" | "JTD"` (optional, default: `JSONSchema`) - the validation mode of the plugin. This is used to specify the type of schema that needs to be compiled.
+* **mode** `"JSONSchema" | "JTD"` (optional, default: `"JSONSchema"`) - the validation mode of the plugin. This is used to specify the type of schema that needs to be compiled.
 * **schema** `MercuriusValidationSchema` (optional) - the validation schema definition that the plugin with run. One can define JSON Schema or JTD definitions for GraphQL types, fields and arguments or functions for GraphQL arguments.
+* **directiveValidation** `boolean` (optional, default: `true`) - turn directive validation on or off. It is on by default.
 
 It extends the [AJV options](https://ajv.js.org/options.html). These can be used to register additional `formats` for example and provide further customization to the AJV validation behavior.
 

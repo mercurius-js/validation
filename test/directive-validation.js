@@ -73,7 +73,7 @@ const resolvers = {
 }
 
 t.test('With directives', t => {
-  t.plan(26)
+  t.plan(27)
 
   t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
     t.plan(1)
@@ -2675,6 +2675,56 @@ t.test('With directives', t => {
           }
         }
       ]
+    })
+  })
+
+  t.test('should be able to turn off directive validation', async (t) => {
+    t.plan(1)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    app.register(mercurius, {
+      schema,
+      resolvers
+    })
+    app.register(mercuriusValidation, { directiveValidation: false })
+
+    const query = `query {
+      messages(filters: { text: ""}) {
+        id
+        text
+      }
+    }`
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      url: '/graphql',
+      body: JSON.stringify({ query })
+    })
+
+    t.same(JSON.parse(response.body), {
+      data: {
+        messages: [
+          {
+            id: '0',
+            text: 'Some system message.'
+          },
+          {
+            id: '1',
+            text: 'Hello there'
+          },
+          {
+            id: '2',
+            text: 'Give me a place to stand, a lever long enough and a fulcrum. And I can move the Earth.'
+          },
+          {
+            id: '3',
+            text: ''
+          }
+        ]
+      }
     })
   })
 })
