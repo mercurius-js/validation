@@ -1,5 +1,13 @@
 # JSON Schema validation
 
+- [GraphQL argument validation](#graphql-argument-validation)
+- [GraphQL Input Object type field validation](#graphql-input-object-type-field-validation)
+- [GraphQL Input Object type validation](#graphql-input-object-type-validation)
+- [Additional AJV options](#additional-ajv-options)
+- [Custom errors](#custom-errors)
+- [Type inference](#type-inference)
+- [Caveats](#caveats)
+
 By default, Mercurius validation runs in JSON Schema mode when defining in-band validation schemas. It supports the following validation definitions:
 
 - Validation on GraphQL field arguments

@@ -1,5 +1,10 @@
 # JTD validation
 
+- [GraphQL argument validation](#graphql-argument-validation)
+- [GraphQL Input Object type field validation](#graphql-input-object-type-field-validation)
+- [GraphQL Input Object type validation](#graphql-input-object-type-validation)
+- [Additional AJV options](#additional-ajv-options)
+
 You can setup Mercurius validation to run in JTD mode when defining in-band validation schemas. It supports the following validation definitions:
 
 - Validation on GraphQL field arguments
@@ -8,7 +13,7 @@ You can setup Mercurius validation to run in JTD mode when defining in-band vali
 
 When defining validations for each of the above, any valid JTD keyword is supported.
 
-To enable JTD mode, set the following at registration:
+To enable JTD mode, set the `mode` options to `"JTD"` at registration:
 
 ```js
 app.register(mercuriusValidation, {
