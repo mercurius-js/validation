@@ -1,5 +1,7 @@
 # Function validation
 
+- [GraphQL argument validation](#graphql-argument-validation)
+
 You can setup Mercurius validation to run custom functions on arguments when defining in-band validation schemas. It supports the following validation definitions:
 
 - Validation on GraphQL field arguments

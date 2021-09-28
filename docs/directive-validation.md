@@ -1,5 +1,13 @@
 # Directive validation
 
+- [Using the GraphQL definitions within your schema](#using-the-graphql-definitions-within-your-schema)
+- [GraphQL argument validation](#graphql-argument-validation)
+- [GraphQL Input Object type field validation](#graphql-input-object-type-field-validation)
+- [GraphQL Input Object type validation](#graphql-input-object-type-validation)
+- [Additional AJV options](#additional-ajv-options)
+- [Turning off directive validation](#turning-off-directive-validation)
+- [Unsupported JSON Schema keywords](#unsupported-json-schema-keywords)
+
 By default, Mercurius validation supports `@constraint` Directives out of the box. It is defined as follows:
 
 ```gql
@@ -44,6 +52,51 @@ To get up and running, you can even register the plugin without options (it also
 
 ```js
 app.register(mercuriusValidation)
+```
+
+## Using the GraphQL definitions within your schema
+
+`mercurius-validation` provides `GraphQLDirective` and type definitions to allow one to use the `@constraint` directive within a GraphQL schema.
+
+For string-based schema definitions, you can use as follows:
+
+```js
+'use strict'
+
+const mercuriusValidation = require('mercurius-validation')
+
+const schema = `
+  ${mercuriusValidation.graphQLTypeDefs}
+
+  type Message {
+    id: ID!
+    text: String
+  }
+
+  input Filters {
+    id: ID
+    text: String @constraint(minLength: 1)
+  }
+
+  type Query {
+    message(id: ID @constraint(type: "string", minLength: 1)): Message
+    messages(filters: Filters): [Message]
+  }
+`
+```
+
+For executable schema definitions, you can use as follows:
+
+```js
+'use strict'
+
+const { parse, GraphQLSchema } = require('graphql')
+const mercuriusValidation = require('mercurius-validation')
+
+// Define your executable schema as normal
+const graphQLSchemaToExtend = new GraphQLSchema({ ... })
+
+const schema = extendSchema(graphQLSchemaToExtend, parse(mercuriusValidation.graphQLTypeDefs))
 ```
 
 ## GraphQL argument validation
@@ -280,6 +333,17 @@ When run, this would produce the following validation error when an input is not
     }
   ]
 }
+```
+
+## Turning off directive validation
+
+If you don't want to run directive validation within the plugin, you can turn it off during plugin registration:
+
+```js
+app.register(mercuriusValidation, {
+  directiveValidation: false
+  // Additional options here
+})
 ```
 
 ## Unsupported JSON Schema keywords
