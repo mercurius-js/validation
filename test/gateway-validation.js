@@ -99,6 +99,7 @@ async function createTestGatewayServer (t, validationOptions) {
     type User @key(fields: "id") @extends {
       id: ID! @external
       topPosts(count: Int!): [Post]
+      topPostsFloat(count: Float!): [Post]
     }`
 
   const postServiceResolvers = {
@@ -115,6 +116,9 @@ async function createTestGatewayServer (t, validationOptions) {
     },
     User: {
       topPosts: (user, { count }, context, info) => {
+        return Object.values(posts).filter(p => p.authorId === user.id).slice(0, count)
+      },
+      topPostsFloat: (user, { count }, context, info) => {
         return Object.values(posts).filter(p => p.authorId === user.id).slice(0, count)
       }
     },
@@ -148,6 +152,9 @@ async function createTestGatewayServer (t, validationOptions) {
       User: {
         topPosts: {
           count: { type: 'integer', minimum: 1 }
+        },
+        topPostsFloat: {
+          count: { type: 'number', minimum: 1 }
         }
       }
     }
@@ -175,6 +182,12 @@ t.test('Gateway validation', t => {
               id
             }
           }
+          topPostsFloat(count: 2) {
+            pid
+            author {
+              id
+            }
+          }
         }
         topPosts(count: 2) {
           pid
@@ -195,6 +208,20 @@ t.test('Gateway validation', t => {
           name: 'John',
           nickname: 'John',
           topPosts: [
+            {
+              pid: 'p1',
+              author: {
+                id: 'u1'
+              }
+            },
+            {
+              pid: 'p3',
+              author: {
+                id: 'u1'
+              }
+            }
+          ],
+          topPostsFloat: [
             {
               pid: 'p1',
               author: {
@@ -291,7 +318,7 @@ t.test('Gateway validation', t => {
                 schema: 1,
                 parentSchema: {
                   $id: 'https://mercurius.dev/validation/Query/me/id',
-                  type: 'integer',
+                  type: ['integer', 'null'],
                   minimum: 1
                 },
                 data: 0
@@ -326,7 +353,7 @@ t.test('Gateway validation', t => {
                 schema: 1,
                 parentSchema: {
                   $id: 'https://mercurius.dev/validation/Query/topPosts/count',
-                  type: 'integer',
+                  type: ['integer', 'null'],
                   minimum: 1
                 },
                 data: -2

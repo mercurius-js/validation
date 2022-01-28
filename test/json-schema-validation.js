@@ -69,7 +69,7 @@ const resolvers = {
 }
 
 t.test('JSON Schema validators', t => {
-  t.plan(17)
+  t.plan(18)
 
   t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
     t.plan(1)
@@ -276,7 +276,7 @@ t.test('JSON Schema validators', t => {
                 schema: 1,
                 parentSchema: {
                   $id: 'https://mercurius.dev/validation/Filters/text',
-                  type: 'string',
+                  type: ['string', 'null'],
                   minLength: 1
                 },
                 data: ''
@@ -349,7 +349,7 @@ t.test('JSON Schema validators', t => {
                 schema: 1,
                 parentSchema: {
                   $id: 'https://mercurius.dev/validation/Filters/text',
-                  type: 'string',
+                  type: ['string', 'null'],
                   minLength: 1
                 },
                 data: ''
@@ -570,7 +570,7 @@ t.test('JSON Schema validators', t => {
                 schema: 1,
                 parentSchema: {
                   $id: 'https://mercurius.dev/validation/Filters/text',
-                  type: 'string',
+                  type: ['string', 'null'],
                   minLength: 1
                 },
                 data: ''
@@ -958,7 +958,7 @@ t.test('JSON Schema validators', t => {
                   type: 'object',
                   properties: {
                     text: {
-                      type: 'string',
+                      type: ['string', 'null'],
                       $id: 'https://mercurius.dev/validation/Filters/text'
                     }
                   }
@@ -1043,7 +1043,7 @@ t.test('JSON Schema validators', t => {
                   properties: {
                     text: {
                       minLength: 1,
-                      type: 'string',
+                      type: ['string', 'null'],
                       $id: 'https://mercurius.dev/validation/Filters/text'
                     }
                   }
@@ -1063,7 +1063,7 @@ t.test('JSON Schema validators', t => {
                 schema: 1,
                 parentSchema: {
                   minLength: 1,
-                  type: 'string',
+                  type: ['string', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/text'
                 },
                 data: ''
@@ -1265,7 +1265,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must NOT have fewer than 1 characters',
                 schema: 1,
                 parentSchema: {
-                  type: 'string',
+                  type: ['string', 'null'],
                   $id: 'https://mercurius.dev/validation/Query/message/id',
                   minLength: 1
                 },
@@ -1299,7 +1299,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must NOT have fewer than 1 characters',
                 schema: 1,
                 parentSchema: {
-                  type: 'string',
+                  type: ['string', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/text',
                   minLength: 1
                 },
@@ -1315,7 +1315,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must NOT have fewer than 1 characters',
                 schema: 1,
                 parentSchema: {
-                  type: 'string',
+                  type: ['string', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/text',
                   minLength: 1
                 },
@@ -1331,7 +1331,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must NOT have fewer than 1 characters',
                 schema: 1,
                 parentSchema: {
-                  type: 'string',
+                  type: ['string', 'null'],
                   minLength: 1
                 },
                 data: ''
@@ -1373,7 +1373,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must NOT have fewer than 1 characters',
                 schema: 1,
                 parentSchema: {
-                  type: 'string',
+                  type: ['string', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/text',
                   minLength: 1
                 },
@@ -1501,7 +1501,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must be >= 1',
                 schema: 1,
                 parentSchema: {
-                  type: 'integer',
+                  type: ['integer', 'null'],
                   $id: 'https://mercurius.dev/validation/Query/message/id',
                   minimum: 1
                 },
@@ -1536,7 +1536,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must be >= 1',
                 schema: 1,
                 parentSchema: {
-                  type: 'integer',
+                  type: ['integer', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/value',
                   minimum: 1
                 },
@@ -1553,7 +1553,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must be >= 1',
                 schema: 1,
                 parentSchema: {
-                  type: 'integer',
+                  type: ['integer', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/value',
                   minimum: 1
                 },
@@ -1570,7 +1570,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must be >= 1',
                 schema: 1,
                 parentSchema: {
-                  type: 'integer',
+                  type: ['integer', 'null'],
                   minimum: 1
                 },
                 data: 0
@@ -1613,7 +1613,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must be >= 1',
                 schema: 1,
                 parentSchema: {
-                  type: 'integer',
+                  type: ['integer', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/value',
                   minimum: 1
                 },
@@ -1741,7 +1741,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must be >= 1',
                 schema: 1,
                 parentSchema: {
-                  type: 'number',
+                  type: ['number', 'null'],
                   $id: 'https://mercurius.dev/validation/Query/message/id',
                   minimum: 1
                 },
@@ -1776,7 +1776,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must be >= 1',
                 schema: 1,
                 parentSchema: {
-                  type: 'number',
+                  type: ['number', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/value',
                   minimum: 1
                 },
@@ -1793,7 +1793,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must be >= 1',
                 schema: 1,
                 parentSchema: {
-                  type: 'number',
+                  type: ['number', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/value',
                   minimum: 1
                 },
@@ -1810,7 +1810,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must be >= 1',
                 schema: 1,
                 parentSchema: {
-                  type: 'number',
+                  type: ['number', 'null'],
                   minimum: 1
                 },
                 data: 0
@@ -1853,7 +1853,7 @@ t.test('JSON Schema validators', t => {
                 message: 'must be >= 1',
                 schema: 1,
                 parentSchema: {
-                  type: 'number',
+                  type: ['number', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/value',
                   minimum: 1
                 },
@@ -2049,6 +2049,44 @@ t.test('JSON Schema validators', t => {
           }
         }
       ]
+    })
+  })
+
+  t.test('should support nullable input type arguments', async (t) => {
+    t.plan(1)
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    app.register(mercurius, {
+      schema: `type Query {
+        nullableInput(input: String): String
+      }`,
+      resolvers: {
+        Query: {
+          nullableInput: async (_, { input }) => {
+            return input
+          }
+        }
+      }
+    })
+    app.register(mercuriusValidation)
+
+    const query = `query {
+      nullableInput(input: null)
+    }`
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      url: '/graphql',
+      body: JSON.stringify({ query })
+    })
+
+    t.same(response.json(), {
+      data: {
+        nullableInput: null
+      }
     })
   })
 })
