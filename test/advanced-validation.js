@@ -167,7 +167,7 @@ t.test('Advanced', t => {
                   schema: 1,
                   parentSchema: {
                     minLength: 1,
-                    type: 'string',
+                    type: ['string', 'null'],
                     $id: 'https://mercurius.dev/validation/Filters/text'
                   },
                   data: ''
@@ -186,7 +186,7 @@ t.test('Advanced', t => {
                     type: 'array',
                     $id: 'https://mercurius.dev/validation/ArrayFilters/values',
                     items: {
-                      type: 'string'
+                      type: ['string', 'null']
                     }
                   },
                   data: []
@@ -223,7 +223,7 @@ t.test('Advanced', t => {
                     type: 'array',
                     $id: 'https://mercurius.dev/validation/Query/messages/arrayScalarFilters',
                     items: {
-                      type: 'string'
+                      type: ['string', 'null']
                     }
                   },
                   data: [
@@ -552,7 +552,7 @@ t.test('Advanced', t => {
                     type: 'array',
                     $id: 'https://mercurius.dev/validation/Query/messages/arrayScalarFilters',
                     items: {
-                      type: 'string'
+                      type: ['string', 'null']
                     }
                   },
                   data: [

@@ -276,7 +276,7 @@ t.test('gateway refresh', t => {
                   schema: 1,
                   parentSchema: {
                     $id: 'https://mercurius.dev/validation/Filters/text',
-                    type: 'string',
+                    type: ['string', 'null'],
                     minLength: 1
                   },
                   data: ''
