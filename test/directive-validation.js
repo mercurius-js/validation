@@ -255,7 +255,7 @@ t.test('With directives', t => {
                 schema: 1,
                 parentSchema: {
                   $id: 'https://mercurius.dev/validation/Filters/text',
-                  type: 'string',
+                  type: ['string', 'null'],
                   minLength: 1
                 },
                 data: ''
@@ -394,7 +394,7 @@ t.test('With directives', t => {
                 schema: 1,
                 parentSchema: {
                   $id: 'https://mercurius.dev/validation/Filters/text',
-                  type: 'string',
+                  type: ['string', 'null'],
                   minLength: 1
                 },
                 data: ''
@@ -500,7 +500,7 @@ t.test('With directives', t => {
                   schema: 1,
                   parentSchema: {
                     $id: 'https://mercurius.dev/validation/Filters/text',
-                    type: 'string',
+                    type: ['string', 'null'],
                     minLength: 1
                   },
                   data: ''
@@ -583,7 +583,7 @@ t.test('With directives', t => {
                   schema: 1,
                   parentSchema: {
                     $id: 'https://mercurius.dev/validation/Filters/text',
-                    type: 'string',
+                    type: ['string', 'null'],
                     minLength: 1
                   },
                   data: ''
@@ -670,7 +670,7 @@ t.test('With directives', t => {
                 schema: 1,
                 parentSchema: {
                   $id: 'https://mercurius.dev/validation/Filters/text',
-                  type: 'string',
+                  type: ['string', 'null'],
                   minLength: 1
                 },
                 data: ''
@@ -1082,7 +1082,7 @@ t.test('With directives', t => {
                   type: 'object',
                   properties: {
                     text: {
-                      type: 'string',
+                      type: ['string', 'null'],
                       $id: 'https://mercurius.dev/validation/Filters/text'
                     }
                   }
@@ -1176,7 +1176,7 @@ t.test('With directives', t => {
                   properties: {
                     text: {
                       minLength: 1,
-                      type: 'string',
+                      type: ['string', 'null'],
                       $id: 'https://mercurius.dev/validation/Filters/text'
                     }
                   }
@@ -1196,7 +1196,7 @@ t.test('With directives', t => {
                 schema: 1,
                 parentSchema: {
                   minLength: 1,
-                  type: 'string',
+                  type: ['string', 'null'],
                   $id: 'https://mercurius.dev/validation/Filters/text'
                 },
                 data: ''
