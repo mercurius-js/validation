@@ -52,10 +52,10 @@
     "wait-on": "^6.0.0"
   },
   "dependencies": {
+    "@fastify/error": "^2.0.0",
     "ajv": "^8.6.2",
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
-    "fastify-error": "^1.0.0",
     "fastify-plugin": "^3.0.0",
     "graphql": "^16.2.0"
   },
