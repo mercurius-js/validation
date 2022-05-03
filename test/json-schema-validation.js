@@ -950,7 +950,7 @@ t.test('JSON Schema validators', t => {
                 params: {
                   limit: 1
                 },
-                message: 'must NOT have fewer than 1 items',
+                message: 'must NOT have fewer than 1 properties',
                 schema: 1,
                 parentSchema: {
                   minProperties: 1,
@@ -1034,7 +1034,7 @@ t.test('JSON Schema validators', t => {
                 params: {
                   limit: 2
                 },
-                message: 'must NOT have fewer than 2 items',
+                message: 'must NOT have fewer than 2 properties',
                 schema: 2,
                 parentSchema: {
                   minProperties: 2,
