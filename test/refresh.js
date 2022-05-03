@@ -79,7 +79,7 @@ t.test('gateway refresh', t => {
 
     messageService.register(mercurius, {
       schema,
-      resolvers: resolvers,
+      resolvers,
       federationMetadata: true
     })
 
