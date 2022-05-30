@@ -52,7 +52,7 @@
     "wait-on": "^6.0.0"
   },
   "dependencies": {
-    "@fastify/error": "^2.0.0",
+    "@fastify/error": "^3.0.0",
     "ajv": "^8.6.2",
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
