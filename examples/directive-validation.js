@@ -60,4 +60,4 @@ app.register(mercurius, {
 })
 app.register(mercuriusValidation)
 
-app.listen(3000)
+app.listen({ port: 3000 })
