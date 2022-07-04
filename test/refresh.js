@@ -83,7 +83,7 @@ t.test('gateway refresh', t => {
       federationMetadata: true
     })
 
-    await messageService.listen(0)
+    await messageService.listen({ port: 0 })
 
     const messageServicePort = messageService.server.address().port
 
@@ -92,7 +92,7 @@ t.test('gateway refresh', t => {
         services: [
           {
             name: 'message',
-            url: `http://localhost:${messageServicePort}/graphql`
+            url: `http://127.0.0.1:${messageServicePort}/graphql`
           }
         ],
         pollingInterval: 2000

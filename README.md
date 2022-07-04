@@ -117,7 +117,7 @@ app.register(mercuriusValidation, {
   }
 })
 
-app.listen(3000)
+app.listen({ port: 3000 })
 ```
 
 ### Validation with the GraphQL `@constraint` directive
@@ -187,7 +187,7 @@ app.register(mercurius, {
 })
 app.register(mercuriusValidation)
 
-app.listen(3000)
+app.listen({ port: 3000 })
 ```
 
 ## Benchmarks
@@ -197,7 +197,7 @@ app.listen(3000)
 Last run: `2021-09-27`
 
 ```text
-Running 10s test @ http://localhost:3000/graphql
+Running 10s test @ http://127.0.0.1:3000/graphql
 100 connections
 
 ┌─────────┬──────┬──────┬───────┬───────┬─────────┬─────────┬───────┐
@@ -223,7 +223,7 @@ Req/Bytes counts sampled once per second.
 Last run: `2021-09-27`
 
 ```text
-Running 10s test @ http://localhost:3000/graphql
+Running 10s test @ http://127.0.0.1:3000/graphql
 100 connections
 
 ┌─────────┬──────┬──────┬───────┬───────┬─────────┬─────────┬───────┐
@@ -249,7 +249,7 @@ Req/Bytes counts sampled once per second.
 Last run: `2021-09-27`
 
 ```text
-Running 10s test @ http://localhost:3000/graphql
+Running 10s test @ http://127.0.0.1:3000/graphql
 100 connections
 
 ┌─────────┬───────┬───────┬───────┬────────┬──────────┬──────────┬────────┐
@@ -275,7 +275,7 @@ Req/Bytes counts sampled once per second.
 Last run: `2021-09-27`
 
 ```text
-Running 10s test @ http://localhost:3000/graphql
+Running 10s test @ http://127.0.0.1:3000/graphql
 100 connections
 
 ┌─────────┬───────┬───────┬───────┬────────┬──────────┬──────────┬────────┐
