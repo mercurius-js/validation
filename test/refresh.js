@@ -4,7 +4,8 @@ const t = require('tap')
 const FakeTimers = require('@sinonjs/fake-timers')
 const { promisify } = require('util')
 const Fastify = require('fastify')
-const mercurius = require('mercurius')
+const { mercuriusFederationPlugin, buildFederationSchema } = require('@mercuriusjs/federation')
+const mercuriusGateway = require('@mercuriusjs/gateway')
 const mercuriusValidation = require('..')
 
 const immediate = promisify(setImmediate)
@@ -77,17 +78,16 @@ t.test('gateway refresh', t => {
       await messageService.close()
     })
 
-    messageService.register(mercurius, {
+    messageService.register(mercuriusFederationPlugin, {
       schema,
-      resolvers,
-      federationMetadata: true
+      resolvers
     })
 
     await messageService.listen({ port: 0 })
 
     const messageServicePort = messageService.server.address().port
 
-    await gateway.register(mercurius, {
+    await gateway.register(mercuriusGateway, {
       gateway: {
         services: [
           {
@@ -196,7 +196,7 @@ t.test('gateway refresh', t => {
         messages(filters: Filters): [Message]
       }
     `
-    messageService.graphql.replaceSchema(mercurius.buildFederationSchema(newSchema))
+    messageService.graphql.replaceSchema(buildFederationSchema(newSchema))
     messageService.graphql.defineResolvers(resolvers)
 
     await clock.tickAsync(2000)
