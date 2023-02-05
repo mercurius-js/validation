@@ -16,9 +16,11 @@ const mercuriusValidation = fp(
     validation.registerValidationSchema(app.graphql.schema)
 
     // Add hook to regenerate the resolvers when the schema is refreshed
-    app.graphql.addHook('onGatewayReplaceSchema', async (instance, schema) => {
-      validation.registerValidationSchema(schema)
-    })
+    if (app.graphqlGateway) {
+      app.graphqlGateway.addHook('onGatewayReplaceSchema', async (instance, schema) => {
+        validation.registerValidationSchema(schema)
+      })
+    }
   },
   {
     name: 'mercurius-validation',
