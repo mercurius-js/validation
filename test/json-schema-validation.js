@@ -99,7 +99,15 @@ t.test('JSON Schema validators', t => {
         id
         text
       }
-      messages(filters: { text: "hello"}, nestedFilters: { input: { text: "hello"} }) {
+      messages(
+        filters: { text: "hello"}, 
+        nestedFilters: { input: { text: "hello"} },
+        arrayScalarFilters: ["hello"],
+        arrayObjectFilters: [{
+          values: ["hello"]
+          filters: [{ text: "hello" }]
+        }]
+      ) {
         id
         text
       }
@@ -456,6 +464,7 @@ t.test('JSON Schema validators', t => {
                     type: 'string',
                     minLength: 1
                   },
+                  nullable: true,
                   minItems: 2
                 },
                 data: ['']
@@ -555,6 +564,7 @@ t.test('JSON Schema validators', t => {
                   items: {
                     $ref: 'https://mercurius.dev/validation/ArrayFilters'
                   },
+                  nullable: true,
                   minItems: 2
                 },
                 data: [{ filters: [{ text: '' }] }]
@@ -767,7 +777,8 @@ t.test('JSON Schema validators', t => {
                   minItems: 2,
                   items: {
                     type: 'string'
-                  }
+                  },
+                  nullable: false
                 },
                 data: [
                   ''
@@ -788,6 +799,7 @@ t.test('JSON Schema validators', t => {
                   items: {
                     $ref: 'https://mercurius.dev/validation/ArrayFilters'
                   },
+                  nullable: false,
                   minItems: 2
                 },
                 data: [{ values: [''], filters: [{ text: '' }] }]
@@ -956,6 +968,7 @@ t.test('JSON Schema validators', t => {
                   minProperties: 1,
                   $id: 'https://mercurius.dev/validation/Filters',
                   type: 'object',
+                  nullable: true,
                   properties: {
                     text: {
                       type: ['string', 'null'],
@@ -1040,6 +1053,7 @@ t.test('JSON Schema validators', t => {
                   minProperties: 2,
                   $id: 'https://mercurius.dev/validation/Filters',
                   type: 'object',
+                  nullable: true,
                   properties: {
                     text: {
                       minLength: 1,
@@ -1351,6 +1365,7 @@ t.test('JSON Schema validators', t => {
                   items: {
                     $ref: 'https://mercurius.dev/validation/ArrayFilters'
                   },
+                  nullable: true,
                   minItems: 2
                 },
                 data: [
@@ -1590,6 +1605,7 @@ t.test('JSON Schema validators', t => {
                   items: {
                     $ref: 'https://mercurius.dev/validation/ArrayFilters'
                   },
+                  nullable: true,
                   minItems: 2
                 },
                 data: [
@@ -1830,6 +1846,7 @@ t.test('JSON Schema validators', t => {
                   items: {
                     $ref: 'https://mercurius.dev/validation/ArrayFilters'
                   },
+                  nullable: true,
                   minItems: 2
                 },
                 data: [
@@ -2059,9 +2076,22 @@ t.test('JSON Schema validators', t => {
     t.teardown(app.close.bind(app))
 
     app.register(mercurius, {
-      schema: `type Query {
-        nullableInput(input: String): String
-      }`,
+      schema: `
+      input TestObject {
+        value: Float!
+      }
+      
+      type Query {
+        nullableInput(
+          stringInput: String,
+          floatInput: Float,
+          intInput: Int,
+          objectInput: TestObject, 
+          arrayInput: [String!], 
+          objectArrayInput: [TestObject!]
+        ): String
+      }
+      `,
       resolvers: {
         Query: {
           nullableInput: async (_, { input }) => {
@@ -2073,7 +2103,14 @@ t.test('JSON Schema validators', t => {
     app.register(mercuriusValidation)
 
     const query = `query {
-      nullableInput(input: null)
+      nullableInput(
+        stringInput: null, 
+        floatInput: null,
+        intInput: null,
+        objectInput: null, 
+        arrayInput: null, 
+        objectArrayInput: null
+      )
     }`
 
     const response = await app.inject({

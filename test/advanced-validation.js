@@ -187,7 +187,8 @@ t.test('Advanced', t => {
                     $id: 'https://mercurius.dev/validation/ArrayFilters/values',
                     items: {
                       type: ['string', 'null']
-                    }
+                    },
+                    nullable: true
                   },
                   data: []
                 }
@@ -224,7 +225,8 @@ t.test('Advanced', t => {
                     $id: 'https://mercurius.dev/validation/Query/messages/arrayScalarFilters',
                     items: {
                       type: ['string', 'null']
-                    }
+                    },
+                    nullable: true
                   },
                   data: [
                     ''
@@ -245,7 +247,8 @@ t.test('Advanced', t => {
                     type: 'array',
                     items: {
                       $ref: 'https://mercurius.dev/validation/ArrayFilters'
-                    }
+                    },
+                    nullable: true
                   },
                   data: []
                 }
@@ -553,7 +556,8 @@ t.test('Advanced', t => {
                     $id: 'https://mercurius.dev/validation/Query/messages/arrayScalarFilters',
                     items: {
                       type: ['string', 'null']
-                    }
+                    },
+                    nullable: true
                   },
                   data: [
                     ''
@@ -574,7 +578,8 @@ t.test('Advanced', t => {
                     type: 'array',
                     items: {
                       $ref: 'https://mercurius.dev/validation/ArrayFilters'
-                    }
+                    },
+                    nullable: true
                   },
                   data: []
                 }
