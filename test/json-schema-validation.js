@@ -2149,8 +2149,8 @@ t.test('JSON Schema validators', t => {
     t.teardown(app.close.bind(app))
 
     app.register(mercurius, {
-      productSchema,
-      productResolvers
+      schema: productSchema,
+      resolvers: productResolvers
     })
     app.register(mercuriusValidation, {
       schema: {
@@ -2170,7 +2170,7 @@ t.test('JSON Schema validators', t => {
       }
     })
 
-    const productQuery = `query {
+    const query = `query {
       product(id: "1") {
         id
         text
@@ -2187,7 +2187,7 @@ t.test('JSON Schema validators', t => {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       url: '/graphql',
-      body: JSON.stringify({ productQuery })
+      body: JSON.stringify({ query })
     })
 
     t.same(JSON.parse(response.body), {
