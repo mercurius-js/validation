@@ -2139,8 +2139,8 @@ t.test('JSON Schema validators', t => {
         product: async (_, { id }) => {
           return products.find(product => product.id === Number(id))
         },
-        products: async () => {
-          return products
+        products: async (_, { filters }) => {
+          return products.filter(product => product.isAvailable === filters.isAvailable)
         }
       }
     }
@@ -2167,6 +2167,7 @@ t.test('JSON Schema validators', t => {
         if (type === GraphQLBoolean) {
           return isNonNull ? { type: 'boolean' } : { type: ['boolean', 'null'] }
         }
+        return {}
       }
     })
 
@@ -2207,11 +2208,6 @@ t.test('JSON Schema validators', t => {
             id: 1,
             text: 'Laptop',
             isAvailable: true
-          },
-          {
-            id: 2,
-            text: 'Keyboard',
-            isAvailable: false
           }
         ]
       }
