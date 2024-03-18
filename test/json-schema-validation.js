@@ -2092,8 +2092,6 @@ t.test('JSON Schema validators', t => {
   })
 
   t.test('should invoke inferCustomType option and not affect operations when everything is okay', async (t) => {
-    t.plan(1)
-
     const productSchema = `
       type Product {
         id: ID!
