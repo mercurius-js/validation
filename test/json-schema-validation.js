@@ -2091,7 +2091,7 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should invoke inferCustomType option and not affect operations when everything is okay', async (t) => {
+  t.test('should invoke customTypeInferenceFn option and not affect operations when everything is okay', async (t) => {
     const productSchema = `
       type Product {
         id: ID!
@@ -2161,11 +2161,10 @@ t.test('JSON Schema validators', t => {
           }
         }
       },
-      inferCustomType: (type, isNonNull) => {
+      customTypeInferenceFn: (type, isNonNull) => {
         if (type === GraphQLBoolean) {
           return isNonNull ? { type: 'boolean' } : { type: ['boolean', 'null'] }
         }
-        return {}
       }
     })
 
