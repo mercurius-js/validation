@@ -57,7 +57,7 @@
     "@fastify/error": "^3.0.0",
     "ajv": "^8.6.2",
     "ajv-errors": "^3.0.0",
-    "ajv-formats": "^2.1.1",
+    "ajv-formats": "^3.0.1",
     "fastify-plugin": "^4.0.0",
     "graphql": "^16.2.0"
   },
