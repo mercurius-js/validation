@@ -655,6 +655,7 @@ t.test('With directives', t => {
                   items: {
                     $ref: 'https://mercurius.dev/validation/ArrayFilters'
                   },
+                  nullable: true,
                   minItems: 2
                 },
                 data: [{ filters: [{ text: '' }] }]
@@ -848,7 +849,8 @@ t.test('With directives', t => {
                   minItems: 2,
                   items: {
                     type: 'string'
-                  }
+                  },
+                  nullable: false
                 },
                 data: [
                   ''
@@ -869,6 +871,7 @@ t.test('With directives', t => {
                   items: {
                     $ref: 'https://mercurius.dev/validation/ArrayFilters'
                   },
+                  nullable: false,
                   minItems: 2
                 },
                 data: [{ values: [''], filters: [{ text: '' }] }]
@@ -1080,6 +1083,7 @@ t.test('With directives', t => {
                   minProperties: 1,
                   $id: 'https://mercurius.dev/validation/Filters',
                   type: 'object',
+                  nullable: true,
                   properties: {
                     text: {
                       type: ['string', 'null'],
@@ -1173,6 +1177,7 @@ t.test('With directives', t => {
                   minProperties: 2,
                   $id: 'https://mercurius.dev/validation/Filters',
                   type: 'object',
+                  nullable: true,
                   properties: {
                     text: {
                       minLength: 1,
@@ -2210,7 +2215,8 @@ t.test('With directives', t => {
                   maxProperties: 1,
                   $id: 'https://mercurius.dev/validation/Query/messages/filters',
                   type: 'object',
-                  $ref: 'https://mercurius.dev/validation/Filters'
+                  $ref: 'https://mercurius.dev/validation/Filters',
+                  nullable: true
                 },
                 data: {
                   id: '',
@@ -2302,7 +2308,8 @@ t.test('With directives', t => {
                   minProperties: 1,
                   $id: 'https://mercurius.dev/validation/Query/messages/filters',
                   type: 'object',
-                  $ref: 'https://mercurius.dev/validation/Filters'
+                  $ref: 'https://mercurius.dev/validation/Filters',
+                  nullable: true
                 },
                 data: {}
               }
@@ -2386,7 +2393,8 @@ t.test('With directives', t => {
                   maxItems: 1,
                   $id: 'https://mercurius.dev/validation/Query/messages/ids',
                   type: 'array',
-                  items: {}
+                  items: {},
+                  nullable: true
                 },
                 data: [
                   '1',
@@ -2473,7 +2481,8 @@ t.test('With directives', t => {
                   minItems: 1,
                   $id: 'https://mercurius.dev/validation/Query/messages/ids',
                   type: 'array',
-                  items: {}
+                  items: {},
+                  nullable: true
                 },
                 data: []
               }
@@ -2558,7 +2567,8 @@ t.test('With directives', t => {
                   uniqueItems: true,
                   $id: 'https://mercurius.dev/validation/Query/messages/ids',
                   type: 'array',
-                  items: {}
+                  items: {},
+                  nullable: true
                 },
                 data: [
                   '1',
@@ -2651,7 +2661,8 @@ t.test('With directives', t => {
                     type: 'integer'
                   },
                   $id: 'https://mercurius.dev/validation/Query/messages/ids',
-                  type: 'array'
+                  type: 'array',
+                  nullable: true
                 },
                 data: [
                   '1.1'
