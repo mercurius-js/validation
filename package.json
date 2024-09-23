@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/mercurius-js/validation",
   "devDependencies": {
-    "@mercuriusjs/federation": "^3.0.0",
+    "@mercuriusjs/federation": "^4.0.0",
     "@mercuriusjs/gateway": "^3.0.0",
     "@sinonjs/fake-timers": "^11.2.2",
     "@types/node": "^22.0.0",
