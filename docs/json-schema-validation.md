@@ -478,6 +478,28 @@ app.register(mercuriusValidation, {
 })
 ```
 
+The type inference is customizable. You can pass `customTypeInferenceFn` in the plugin options and have your own inference logic inside the function. The below code is an example for custom type inference for `GraphQLBoolean` <=> `{ type: 'boolean' }`.
+
+```js
+app.register(mercuriusValidation, {
+  schema: {
+    Filters: {
+      isAvailable: { type: 'boolean' }
+    },
+    Query: {
+      product: {
+        id: { type: 'string', minLength: 1 }
+      }
+    }
+  },
+  customTypeInferenceFn: (type, isNonNull) => {
+    if (type === GraphQLBoolean) {
+      return isNonNull ? { type: 'boolean' } : { type: ['boolean', 'null'] }
+    }
+  }
+})
+```
+
 ## Caveats
 
 The use of the `$ref` keyword is not advised because we use this through the plugin to build up the GraphQL type validation. However, we have not prevented use of this keyword since it may be useful in some situations.

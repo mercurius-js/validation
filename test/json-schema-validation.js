@@ -5,6 +5,7 @@ const Fastify = require('fastify')
 const mercurius = require('mercurius')
 const mercuriusValidation = require('..')
 const { MER_VALIDATION_ERR_FIELD_TYPE_UNDEFINED } = require('../lib/errors')
+const { GraphQLBoolean } = require('graphql')
 
 const schema = `
   type Message {
@@ -69,7 +70,7 @@ const resolvers = {
 }
 
 t.test('JSON Schema validators', t => {
-  t.plan(18)
+  t.plan(19)
 
   t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
     t.plan(1)
@@ -2123,6 +2124,126 @@ t.test('JSON Schema validators', t => {
     t.same(response.json(), {
       data: {
         nullableInput: null
+      }
+    })
+  })
+
+  t.test('should invoke customTypeInferenceFn option and not affect operations when everything is okay', async (t) => {
+    const productSchema = `
+      type Product {
+        id: ID!
+        text: String
+        isAvailable: Boolean
+      }
+
+      input Filters {
+        id: ID
+        text: String
+        isAvailable: Boolean
+      }
+
+      type Query {
+        noResolver(id: ID): ID
+        product(id: ID): Product
+        products(
+          filters: Filters
+        ): [Product]
+      }
+    `
+
+    const products = [
+      {
+        id: 0,
+        text: 'Phone',
+        isAvailable: true
+      },
+      {
+        id: 1,
+        text: 'Laptop',
+        isAvailable: true
+      },
+      {
+        id: 2,
+        text: 'Keyboard',
+        isAvailable: false
+      }
+    ]
+
+    const productResolvers = {
+      Query: {
+        product: async (_, { id }) => {
+          return products.find(product => product.id === Number(id))
+        },
+        products: async (_, { filters }) => {
+          return products.filter(product => product.isAvailable === filters.isAvailable)
+        }
+      }
+    }
+
+    const app = Fastify()
+    t.teardown(app.close.bind(app))
+
+    app.register(mercurius, {
+      schema: productSchema,
+      resolvers: productResolvers
+    })
+    app.register(mercuriusValidation, {
+      schema: {
+        Filters: {
+          isAvailable: { type: 'boolean' }
+        },
+        Query: {
+          product: {
+            id: { type: 'string', minLength: 1 }
+          }
+        }
+      },
+      customTypeInferenceFn: (type, isNonNull) => {
+        if (type === GraphQLBoolean) {
+          return isNonNull ? { type: 'boolean' } : { type: ['boolean', 'null'] }
+        }
+      }
+    })
+
+    const query = `query {
+      product(id: "1") {
+        id
+        text
+        isAvailable
+      }
+      products(filters: { isAvailable: true }) {
+        id
+        text
+        isAvailable
+      }
+    }`
+
+    const response = await app.inject({
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      url: '/graphql',
+      body: JSON.stringify({ query })
+    })
+
+    t.same(JSON.parse(response.body), {
+      data: {
+        product: {
+          id: 1,
+          text: 'Laptop',
+          isAvailable: true
+        },
+        products: [
+          {
+            id: 0,
+            text: 'Phone',
+            isAvailable: true
+          },
+          {
+            id: 1,
+            text: 'Laptop',
+            isAvailable: true
+          }
+        ]
       }
     })
   })

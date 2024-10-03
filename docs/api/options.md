@@ -11,6 +11,7 @@ Extends: [`AJVOptions`](https://ajv.js.org/options.html)
 * **mode** `"JSONSchema" | "JTD"` (optional, default: `"JSONSchema"`) - the validation mode of the plugin. This is used to specify the type of schema that needs to be compiled.
 * **schema** `MercuriusValidationSchema` (optional) - the validation schema definition that the plugin with run. One can define JSON Schema or JTD definitions for GraphQL types, fields and arguments or functions for GraphQL arguments.
 * **directiveValidation** `boolean` (optional, default: `true`) - turn directive validation on or off. It is on by default.
+* **customTypeInferenceFn** `Function` (optional) - add custom type inference for JSON Schema Types. This function overrides the default type inference logic which infers GraphQL primitives like `GraphQLString`, `GraphQLInt` and `GraphQLFloat`. If the custom function doesn't handle the passed type, then it should return a falsy value which will trigger the default type inference logic of the plugin. This function takes two parameters. The first parameter is `type` referring to the GraphQL type under inference, while the second one is `isNonNull`, a boolean value referring whether the value for the type is nullable.
 
 It extends the [AJV options](https://ajv.js.org/options.html). These can be used to register additional `formats` for example and provide further customization to the AJV validation behavior.
 
