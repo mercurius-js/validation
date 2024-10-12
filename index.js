@@ -24,7 +24,7 @@ const mercuriusValidation = fp(
   },
   {
     name: 'mercurius-validation',
-    fastify: '4.x',
+    fastify: '5.x',
     dependencies: ['mercurius']
   }
 )
