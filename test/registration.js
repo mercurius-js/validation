@@ -27,7 +27,6 @@ const resolvers = {
 }
 
 describe('registrations', () => {
-
   test('registration - should error if mercurius is not loaded', async (t) => {
     const app = Fastify()
     test.after(() => app.close())

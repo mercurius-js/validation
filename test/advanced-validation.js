@@ -70,7 +70,6 @@ const resolvers = {
 
 describe('Advanced', () => {
   describe('when mode is JSON Schema', () => {
-
     test('should all work independently together', async t => {
       const app = Fastify()
       t.after(() => app.close())
@@ -415,7 +414,6 @@ describe('Advanced', () => {
 
   describe('when mode is JTD', () => {
     test('should all work independently together', async t => {
-
       const app = Fastify()
       t.after(() => app.close())
 
@@ -604,7 +602,6 @@ describe('Advanced', () => {
     })
 
     test('directive validation should run after in-band validation', async t => {
-
       const app = Fastify()
       t.after(() => app.close())
 

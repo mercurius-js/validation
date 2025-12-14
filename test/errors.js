@@ -36,9 +36,7 @@ const resolvers = {
 }
 
 describe('errors', () => {
-
   describe('MER_VALIDATION_ERR_FAILED_VALIDATION', () => {
-
     describe('toString', () => {
       test('should print a validation error to string', t => {
         const error = new errors.MER_VALIDATION_ERR_FAILED_VALIDATION('some message', [])

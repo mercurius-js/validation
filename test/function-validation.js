@@ -57,12 +57,12 @@ const resolvers = {
 }
 
 const withResolvers = () => {
-  let resolve, reject;
-  const promise = new Promise((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
+  let res, rej
+  const promise = new Promise((resolve, reject) => {
+    res = resolve
+    rej = reject
+  })
+  return { promise, resolve: res, reject: rej }
 }
 
 describe('Function validators', () => {

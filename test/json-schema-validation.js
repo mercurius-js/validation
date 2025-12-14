@@ -478,7 +478,6 @@ describe('JSON Schema validators', () => {
   })
 
   test('should protect schema list input object types and error accordingly', async t => {
-
     const app = Fastify()
     t.after(() => app.close())
 
