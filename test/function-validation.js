@@ -56,25 +56,16 @@ const resolvers = {
   }
 }
 
-const withResolvers = () => {
-  let res, rej
-  const promise = new Promise((resolve, reject) => {
-    res = resolve
-    rej = reject
-  })
-  return { promise, resolve: res, reject: rej }
-}
-
 describe('Function validators', () => {
   test('should protect the schema and not affect operations when everything is okay', async (t) => {
+    t.plan(9)
+
     const app = Fastify()
     t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
     })
-
-    const { promise, resolve } = withResolvers()
 
     app.register(mercuriusValidation, {
       schema: {
@@ -89,7 +80,6 @@ describe('Function validators', () => {
               t.assert.strictEqual(typeof context, 'object')
               t.assert.strictEqual(typeof info, 'object')
               t.assert.strictEqual(info.schema.constructor.name, GraphQLSchema.name)
-              resolve()
               return true
             }
           }
@@ -141,11 +131,11 @@ describe('Function validators', () => {
         ]
       }
     })
-
-    await promise
   })
 
   test('should protect the schema arguments and error accordingly', async (t) => {
+    t.plan(4)
+
     const app = Fastify()
     t.after(() => app.close())
 
@@ -153,7 +143,6 @@ describe('Function validators', () => {
       schema,
       resolvers
     })
-    const { promise, resolve } = withResolvers()
     app.register(mercuriusValidation, {
       schema: {
         Query: {
@@ -164,7 +153,6 @@ describe('Function validators', () => {
               t.assert.strictEqual(argumentValue, 32768)
               const error = new Error('kaboom')
               error.data = 'kaboom data'
-              resolve()
               throw error
             }
           }
@@ -212,18 +200,18 @@ describe('Function validators', () => {
         }
       ]
     })
-
-    await promise
   })
 
   test('should handle when validation is mismatched with the schema and not affect existing functionality', async (t) => {
+    t.plan(4)
+
     const app = Fastify()
     t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
     })
-    const { promise, resolve } = withResolvers()
+
     app.register(mercuriusValidation, {
       schema: {
         Wrong: {
@@ -248,7 +236,6 @@ describe('Function validators', () => {
               t.assert.strictEqual(argumentValue, 32768)
               const error = new Error('kaboom')
               error.data = 'kaboom data'
-              resolve()
               throw error
             },
             wrong: async () => {
@@ -299,7 +286,5 @@ describe('Function validators', () => {
         }
       ]
     })
-
-    await promise
   })
 })
