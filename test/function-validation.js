@@ -1,6 +1,6 @@
 'use strict'
 
-const t = require('tap')
+const { describe, test } = require('node:test')
 const Fastify = require('fastify')
 const mercurius = require('mercurius')
 const mercuriusValidation = require('..')
@@ -56,32 +56,40 @@ const resolvers = {
   }
 }
 
-t.test('Function validators', t => {
-  t.plan(3)
+const withResolvers = () => {
+  let resolve, reject;
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
 
-  t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
-    t.plan(9)
-
+describe('Function validators', () => {
+  test('should protect the schema and not affect operations when everything is okay', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
     })
+
+    const { promise, resolve } = withResolvers()
+
     app.register(mercuriusValidation, {
       schema: {
         Query: {
           message: {
             id: async (metadata, argumentValue, parent, args, context, info) => {
-              t.ok('should be called')
-              t.same(metadata, { type: 'Query', field: 'message', argument: 'id' })
-              t.equal(argumentValue, 1)
-              t.type(parent, 'object')
-              t.type(args, 'object')
-              t.type(context, 'object')
-              t.type(info, 'object')
-              t.type(info.schema, GraphQLSchema)
+              t.assert.ok('should be called')
+              t.assert.deepStrictEqual(metadata, { type: 'Query', field: 'message', argument: 'id' })
+              t.assert.strictEqual(argumentValue, 1)
+              t.assert.strictEqual(typeof parent, 'object')
+              t.assert.strictEqual(typeof args, 'object')
+              t.assert.strictEqual(typeof context, 'object')
+              t.assert.strictEqual(typeof info, 'object')
+              t.assert.strictEqual(info.schema.constructor.name, GraphQLSchema.name)
+              resolve()
               return true
             }
           }
@@ -107,7 +115,7 @@ t.test('Function validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: {
           id: '1',
@@ -133,28 +141,30 @@ t.test('Function validators', t => {
         ]
       }
     })
+
+    await promise
   })
 
-  t.test('should protect the schema arguments and error accordingly', async (t) => {
-    t.plan(4)
-
+  test('should protect the schema arguments and error accordingly', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
       resolvers
     })
+    const { promise, resolve } = withResolvers()
     app.register(mercuriusValidation, {
       schema: {
         Query: {
           message: {
             id: async (metadata, argumentValue) => {
-              t.ok('should be called')
-              t.same(metadata, { type: 'Query', field: 'message', argument: 'id' })
-              t.equal(argumentValue, 32768)
+              t.assert.ok('should be called')
+              t.assert.deepStrictEqual(metadata, { type: 'Query', field: 'message', argument: 'id' })
+              t.assert.strictEqual(argumentValue, 32768)
               const error = new Error('kaboom')
               error.data = 'kaboom data'
+              resolve()
               throw error
             }
           }
@@ -176,7 +186,7 @@ t.test('Function validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -202,46 +212,47 @@ t.test('Function validators', t => {
         }
       ]
     })
+
+    await promise
   })
 
-  t.test('should handle when validation is mismatched with the schema and not affect existing functionality', async (t) => {
-    t.plan(4)
-
+  test('should handle when validation is mismatched with the schema and not affect existing functionality', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
     })
+    const { promise, resolve } = withResolvers()
     app.register(mercuriusValidation, {
       schema: {
         Wrong: {
           text: {
             arg: async () => {
-              t.fail('should not be called when type name is wrong')
+              t.assert.fail('should not be called when type name is wrong')
             }
           }
         },
         Message: {
           wrong: {
             arg: async () => {
-              t.fail('should not be called when field name is wrong')
+              t.assert.fail('should not be called when field name is wrong')
             }
           }
         },
         Query: {
           message: {
             id: async (metadata, argumentValue) => {
-              t.ok('should be called')
-              t.same(metadata, { type: 'Query', field: 'message', argument: 'id' })
-              t.equal(argumentValue, 32768)
+              t.assert.ok('should be called')
+              t.assert.deepStrictEqual(metadata, { type: 'Query', field: 'message', argument: 'id' })
+              t.assert.strictEqual(argumentValue, 32768)
               const error = new Error('kaboom')
               error.data = 'kaboom data'
+              resolve()
               throw error
             },
             wrong: async () => {
-              t.fail('should not be called when arg name is wrong')
+              t.assert.fail('should not be called when arg name is wrong')
             }
           }
         }
@@ -262,7 +273,7 @@ t.test('Function validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -288,5 +299,7 @@ t.test('Function validators', t => {
         }
       ]
     })
+
+    await promise
   })
 })
