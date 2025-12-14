@@ -1,6 +1,6 @@
 'use strict'
 
-const t = require('tap')
+const { describe, test } = require('node:test')
 const Fastify = require('fastify')
 const mercurius = require('mercurius')
 const { AssertionError } = require('assert')
@@ -26,16 +26,13 @@ const resolvers = {
   }
 }
 
-t.test('registrations', t => {
-  t.plan(7)
+describe('registrations', () => {
 
-  t.test('registration - should error if mercurius is not loaded', async (t) => {
-    t.plan(1)
-
+  test('registration - should error if mercurius is not loaded', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    test.after(() => app.close())
 
-    t.rejects(app.register(mercuriusValidation, {}), new AssertionError({
+    await t.assert.rejects(async () => app.register(mercuriusValidation, {}), new AssertionError({
       message:
               "The dependency 'mercurius' of plugin 'mercurius-validation' is not registered",
       actual: false,
@@ -44,103 +41,86 @@ t.test('registrations', t => {
     }))
   })
 
-  t.test('registration - should error if schema is defined but not an object', async (t) => {
-    t.plan(1)
-
+  test('registration - should error if schema is defined but not an object', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
     })
 
-    t.rejects(
-      app.register(mercuriusValidation, { schema: 'string' }),
+    await t.assert.rejects(
+      async () => app.register(mercuriusValidation, { schema: 'string' }),
       new MER_VALIDATION_ERR_INVALID_OPTS('opts.schema must be an object.')
     )
   })
 
-  t.test('registration - should error if mode is defined but not a string', async (t) => {
-    t.plan(1)
-
+  test('registration - should error if mode is defined but not a string', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
     })
 
-    t.rejects(
-      app.register(mercuriusValidation, { mode: 123456 }),
+    await t.assert.rejects(
+      async () => app.register(mercuriusValidation, { mode: 123456 }),
       new MER_VALIDATION_ERR_INVALID_OPTS('opts.mode must be a string.')
     )
   })
 
-  t.test('registration - should error if directiveValidation is defined but not a boolean', async (t) => {
-    t.plan(1)
-
+  test('registration - should error if directiveValidation is defined but not a boolean', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
     })
 
-    t.rejects(
-      app.register(mercuriusValidation, { directiveValidation: 'string' }),
+    await t.assert.rejects(
+      async () => app.register(mercuriusValidation, { directiveValidation: 'string' }),
       new MER_VALIDATION_ERR_INVALID_OPTS('opts.directiveValidation must be a boolean.')
     )
   })
 
-  t.test('registration - should error if schema type is not an object', async (t) => {
-    t.plan(1)
-
+  test('registration - should error if schema type is not an object', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
       resolvers
     })
 
-    t.rejects(
-      app.register(mercuriusValidation, { schema: { foo: 'bad' } }),
+    await t.assert.rejects(
+      async () => app.register(mercuriusValidation, { schema: { foo: 'bad' } }),
       new MER_VALIDATION_ERR_INVALID_OPTS('opts.schema.foo must be an object.')
     )
   })
 
-  t.test('registration - should error if schema type field is a function', async (t) => {
-    t.plan(1)
-
+  test('registration - should error if schema type field is a function', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
     })
 
-    t.rejects(
-      app.register(mercuriusValidation, { schema: { foo: { bar: () => {} } } }),
+    await t.assert.rejects(
+      async () => app.register(mercuriusValidation, { schema: { foo: { bar: () => {} } } }),
       new MER_VALIDATION_ERR_INVALID_OPTS('opts.schema.foo.bar cannot be a function. Only field arguments currently support functional validators.')
     )
   })
 
-  t.test('registration - should register the plugin without options', async (t) => {
-    t.plan(1)
-
+  test('registration - should register the plugin without options', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
     })
     await app.register(mercuriusValidation)
 
-    t.ok('mercurius validation plugin is registered without options')
+    t.assert.ok('mercurius validation plugin is registered without options')
   })
 })
