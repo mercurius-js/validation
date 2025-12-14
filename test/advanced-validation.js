@@ -1,6 +1,6 @@
 'use strict'
 
-const t = require('tap')
+const { describe, test } = require('node:test')
 const Fastify = require('fastify')
 const mercurius = require('mercurius')
 const mercuriusValidation = require('..')
@@ -68,17 +68,12 @@ const resolvers = {
   }
 }
 
-t.test('Advanced', t => {
-  t.plan(2)
+describe('Advanced', () => {
+  describe('when mode is JSON Schema', () => {
 
-  t.test('when mode is JSON Schema', t => {
-    t.plan(2)
-
-    t.test('should all work independently together', async (t) => {
-      t.plan(1)
-
+    test('should all work independently together', async t => {
       const app = Fastify()
-      t.teardown(app.close.bind(app))
+      t.after(() => app.close())
 
       app.register(mercurius, {
         schema,
@@ -134,7 +129,7 @@ t.test('Advanced', t => {
         body: JSON.stringify({ query })
       })
 
-      t.same(JSON.parse(response.body), {
+      t.assert.deepStrictEqual(JSON.parse(response.body), {
         data: {
           message: null,
           messages: null,
@@ -282,11 +277,9 @@ t.test('Advanced', t => {
       })
     })
 
-    t.test('directive validation should run after in-band validation', async t => {
-      t.plan(2)
-
+    test('directive validation should run after in-band validation', async t => {
       const app = Fastify()
-      t.teardown(app.close.bind(app))
+      t.after(() => app.close())
 
       app.register(mercurius, {
         schema,
@@ -317,7 +310,7 @@ t.test('Advanced', t => {
           body: JSON.stringify({ query })
         })
 
-        t.same(JSON.parse(response.body), {
+        t.assert.deepStrictEqual(JSON.parse(response.body), {
           data: {
             message: null
           },
@@ -375,7 +368,7 @@ t.test('Advanced', t => {
           body: JSON.stringify({ query })
         })
 
-        t.same(JSON.parse(response.body), {
+        t.assert.deepStrictEqual(JSON.parse(response.body), {
           data: {
             message: null
           },
@@ -420,14 +413,11 @@ t.test('Advanced', t => {
     })
   })
 
-  t.test('when mode is JTD', t => {
-    t.plan(2)
-
-    t.test('should all work independently together', async (t) => {
-      t.plan(1)
+  describe('when mode is JTD', () => {
+    test('should all work independently together', async t => {
 
       const app = Fastify()
-      t.teardown(app.close.bind(app))
+      t.after(() => app.close())
 
       app.register(mercurius, {
         schema,
@@ -478,7 +468,7 @@ t.test('Advanced', t => {
         body: JSON.stringify({ query })
       })
 
-      t.same(JSON.parse(response.body), {
+      t.assert.deepStrictEqual(JSON.parse(response.body), {
         data: {
           message: null,
           messages: null,
@@ -613,11 +603,10 @@ t.test('Advanced', t => {
       })
     })
 
-    t.test('directive validation should run after in-band validation', async t => {
-      t.plan(2)
+    test('directive validation should run after in-band validation', async t => {
 
       const app = Fastify()
-      t.teardown(app.close.bind(app))
+      t.after(() => app.close())
 
       app.register(mercurius, {
         schema,
@@ -649,7 +638,7 @@ t.test('Advanced', t => {
           body: JSON.stringify({ query })
         })
 
-        t.same(JSON.parse(response.body), {
+        t.assert.deepStrictEqual(JSON.parse(response.body), {
           data: {
             message: null
           },
@@ -714,7 +703,7 @@ t.test('Advanced', t => {
           body: JSON.stringify({ query })
         })
 
-        t.same(JSON.parse(response.body), {
+        t.assert.deepStrictEqual(JSON.parse(response.body), {
           data: {
             message: null
           },
