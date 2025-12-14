@@ -1,6 +1,6 @@
 'use strict'
 
-const t = require('tap')
+const { describe, test } = require('node:test')
 const Fastify = require('fastify')
 const mercurius = require('mercurius')
 const mercuriusValidation = require('..')
@@ -72,14 +72,10 @@ const resolvers = {
   }
 }
 
-t.test('With directives', t => {
-  t.plan(27)
-
-  t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
-    t.plan(1)
-
+describe('With directives', () => {
+  test('should protect the schema and not affect operations when everything is okay', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -105,7 +101,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: {
           id: '1',
@@ -133,11 +129,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should protect the schema arguments and error accordingly', async (t) => {
-    t.plan(1)
-
+  test('should protect the schema arguments and error accordingly', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -159,7 +153,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -200,12 +194,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should protect the schema input types and error accordingly', async (t) => {
-    t.plan(1)
-
+  test('should protect the schema input types and error accordingly', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
@@ -226,7 +217,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -267,9 +258,7 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should work alongside existing directives', async (t) => {
-    t.plan(1)
-
+  test('should work alongside existing directives', async (t) => {
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
 
@@ -306,7 +295,7 @@ t.test('With directives', t => {
   `
 
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -332,7 +321,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null,
         messages: null
@@ -406,11 +395,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support jit', async (t) => {
-    t.plan(2)
-
+  test('should support jit', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -438,7 +425,7 @@ t.test('With directives', t => {
         body: JSON.stringify({ query })
       })
 
-      t.same(JSON.parse(response.body), {
+      t.assert.deepStrictEqual(JSON.parse(response.body), {
         data: {
           message: null,
           messages: null
@@ -521,7 +508,7 @@ t.test('With directives', t => {
         body: JSON.stringify({ query })
       })
 
-      t.same(JSON.parse(response.body), {
+      t.assert.deepStrictEqual(JSON.parse(response.body), {
         data: {
           message: null,
           messages: null
@@ -596,12 +583,9 @@ t.test('With directives', t => {
     }
   })
 
-  t.test('should protect schema list input object types and error accordingly', async t => {
-    t.plan(1)
-
+  test('should protect schema list input object types and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
@@ -622,7 +606,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -683,12 +667,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should protect schema non-null types and error accordingly', async t => {
-    t.plan(1)
-
+  test('should protect schema non-null types and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
 
@@ -751,7 +732,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null,
         messages: null
@@ -899,11 +880,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support additional AJV options', async t => {
-    t.plan(1)
-
+  test('should support additional AJV options', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -962,7 +941,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -1006,11 +985,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should protect at the input object type level and error accordingly', async t => {
-    t.plan(1)
-
+  test('should protect at the input object type level and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -1050,7 +1027,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -1100,11 +1077,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should protect at the input object type level alongside existing field validation and error accordingly', async t => {
-    t.plan(1)
-
+  test('should protect at the input object type level alongside existing field validation and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -1144,7 +1119,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -1213,14 +1188,10 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "type" input and error accordingly', async t => {
-    t.plan(2)
-
-    t.test('should support a single type', async t => {
-      t.plan(1)
-
+  describe('should support the JSON Schema "type" input and error accordingly', () => {
+    test('should support a single type', async t => {
       const app = Fastify()
-      t.teardown(app.close.bind(app))
+      t.after(() => app.close())
 
       const schema = `
         ${mercuriusValidation.graphQLTypeDefs}
@@ -1256,7 +1227,7 @@ t.test('With directives', t => {
         body: JSON.stringify({ query })
       })
 
-      t.same(JSON.parse(response.body), {
+      t.assert.deepStrictEqual(JSON.parse(response.body), {
         data: {
           message: null
         },
@@ -1298,11 +1269,9 @@ t.test('With directives', t => {
       })
     })
 
-    t.test('should support multiple types', async t => {
-      t.plan(1)
-
+    test('should support multiple types', async t => {
       const app = Fastify()
-      t.teardown(app.close.bind(app))
+      t.after(() => app.close())
 
       const schema = `
         ${mercuriusValidation.graphQLTypeDefs}
@@ -1338,7 +1307,7 @@ t.test('With directives', t => {
         body: JSON.stringify({ query })
       })
 
-      t.same(JSON.parse(response.body), {
+      t.assert.deepStrictEqual(JSON.parse(response.body), {
         data: {
           message: null
         },
@@ -1386,12 +1355,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "maxLength" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "maxLength" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
 
@@ -1426,7 +1392,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -1469,11 +1435,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "minLength" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "minLength" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -1509,7 +1473,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -1552,11 +1516,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "format" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "format" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -1592,7 +1554,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -1635,11 +1597,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "pattern" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "pattern" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -1675,7 +1635,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -1718,11 +1678,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "maximum" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "maximum" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -1758,7 +1716,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -1802,12 +1760,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "minimum" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "minimum" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
 
@@ -1842,7 +1797,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -1886,12 +1841,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "exclusiveMaximum" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "exclusiveMaximum" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
 
@@ -1926,7 +1878,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -1970,11 +1922,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "exclusiveMinimum" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "exclusiveMinimum" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -2010,7 +1960,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -2054,11 +2004,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "multipleOf" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "multipleOf" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -2094,7 +2042,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -2137,11 +2085,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "maxProperties" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "maxProperties" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -2182,7 +2128,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -2230,11 +2176,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "minProperties" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "minProperties" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -2275,7 +2219,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -2320,12 +2264,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "maxItems" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "maxItems" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
 
@@ -2360,7 +2301,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -2408,11 +2349,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "minItems" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "minItems" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -2448,7 +2387,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -2493,11 +2432,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the JSON Schema "uniqueItems" input and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the JSON Schema "uniqueItems" input and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       ${mercuriusValidation.graphQLTypeDefs}
@@ -2533,7 +2470,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -2582,12 +2519,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should support the custom "schema" input for unsupported JSON schemas and error accordingly', async t => {
-    t.plan(1)
-
+  test('should support the custom "schema" input for unsupported JSON schemas and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     const idValidationSchema = JSON.stringify({
       items: { type: 'integer' }
     }).replace(/"/g, '\\"')
@@ -2626,7 +2560,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -2689,12 +2623,9 @@ t.test('With directives', t => {
     })
   })
 
-  t.test('should be able to turn off directive validation', async (t) => {
-    t.plan(1)
-
+  test('should be able to turn off directive validation', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
@@ -2715,7 +2646,7 @@ t.test('With directives', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: [
           {

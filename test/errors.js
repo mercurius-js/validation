@@ -1,6 +1,6 @@
 'use strict'
 
-const t = require('tap')
+const { describe, test } = require('node:test')
 const errors = require('../lib/errors')
 const Fastify = require('fastify')
 const mercurius = require('mercurius')
@@ -35,31 +35,21 @@ const resolvers = {
   }
 }
 
-t.test('errors', t => {
-  t.plan(3)
-
-  t.test('MER_VALIDATION_ERR_FAILED_VALIDATION', t => {
-    t.plan(1)
-
-    t.test('toString', t => {
-      t.plan(1)
-
-      t.test('should print a validation error to string', t => {
-        t.plan(2)
-
+describe('errors', () => {
+  describe('MER_VALIDATION_ERR_FAILED_VALIDATION', () => {
+    describe('toString', () => {
+      test('should print a validation error to string', t => {
         const error = new errors.MER_VALIDATION_ERR_FAILED_VALIDATION('some message', [])
 
-        t.same(error.toString(), 'ValidationError [MER_VALIDATION_ERR_FAILED_VALIDATION]: some message')
-        t.equal(error.statusCode, 400)
+        t.assert.strictEqual(error.toString(), 'ValidationError [MER_VALIDATION_ERR_FAILED_VALIDATION]: some message')
+        t.assert.strictEqual(error.statusCode, 400)
       })
     })
   })
 
-  t.test('Validation errors result in a response status code of 400 when result is not nullable', async (t) => {
-    t.plan(2)
-
+  test('Validation errors result in a response status code of 400 when result is not nullable', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -81,7 +71,7 @@ t.test('errors', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: null,
       errors: [
         {
@@ -118,14 +108,12 @@ t.test('errors', t => {
         }
       ]
     })
-    t.equal(response.statusCode, 400)
+    t.assert.strictEqual(response.statusCode, 400)
   })
 
-  t.test('Validation errors result in a response status code of 200 when result is nullable', async (t) => {
-    t.plan(2)
-
+  test('Validation errors result in a response status code of 200 when result is nullable', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -147,7 +135,7 @@ t.test('errors', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messageNullable: null
       },
@@ -186,6 +174,6 @@ t.test('errors', t => {
         }
       ]
     })
-    t.equal(response.statusCode, 200)
+    t.assert.strictEqual(response.statusCode, 200)
   })
 })

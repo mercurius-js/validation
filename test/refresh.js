@@ -1,6 +1,6 @@
 'use strict'
 
-const t = require('tap')
+const { describe, test } = require('node:test')
 const FakeTimers = require('@sinonjs/fake-timers')
 const { promisify } = require('util')
 const Fastify = require('fastify')
@@ -59,21 +59,17 @@ const resolvers = {
   }
 }
 
-t.test('gateway refresh', t => {
-  t.plan(1)
-
-  t.test('polling interval with a new schema should trigger refresh of schema policy build', async t => {
-    t.plan(2)
-
+describe('gateway refresh', () => {
+  test('polling interval with a new schema should trigger refresh of schema policy build', async t => {
     const clock = FakeTimers.install({
       shouldAdvanceTime: true,
       advanceTimeDelta: 40
     })
-    t.teardown(() => clock.uninstall())
+    t.after(() => clock.uninstall())
 
     const messageService = Fastify()
     const gateway = Fastify()
-    t.teardown(async () => {
+    t.after(async () => {
       await gateway.close()
       await messageService.close()
     })
@@ -119,7 +115,7 @@ t.test('gateway refresh', t => {
         body: JSON.stringify({ query })
       })
 
-      t.same(JSON.parse(res.body), {
+      t.assert.deepStrictEqual(JSON.parse(res.body), {
         data: {
           message: null,
           messages: [
@@ -214,7 +210,7 @@ t.test('gateway refresh', t => {
         body: JSON.stringify({ query })
       })
 
-      t.same(JSON.parse(res.body), {
+      t.assert.deepStrictEqual(JSON.parse(res.body), {
         data: {
           message: null,
           messages: null

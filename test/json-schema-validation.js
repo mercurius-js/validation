@@ -1,6 +1,6 @@
 'use strict'
 
-const t = require('tap')
+const { describe, test } = require('node:test')
 const Fastify = require('fastify')
 const mercurius = require('mercurius')
 const mercuriusValidation = require('..')
@@ -69,14 +69,10 @@ const resolvers = {
   }
 }
 
-t.test('JSON Schema validators', t => {
-  t.plan(19)
-
-  t.test('should protect the schema and not affect operations when everything is okay', async (t) => {
-    t.plan(1)
-
+describe('JSON Schema validators', () => {
+  test('should protect the schema and not affect operations when everything is okay', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -121,7 +117,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: {
           id: '1',
@@ -149,12 +145,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should protect the schema arguments and error accordingly', async (t) => {
-    t.plan(1)
-
+  test('should protect the schema arguments and error accordingly', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
@@ -183,7 +176,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -224,11 +217,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should protect the schema input types and error accordingly', async (t) => {
-    t.plan(1)
-
+  test('should protect the schema input types and error accordingly', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -256,7 +247,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -297,11 +288,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should protect the schema input types with nested types and error accordingly', async (t) => {
-    t.plan(1)
-
+  test('should protect the schema input types with nested types and error accordingly', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -329,7 +318,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -370,18 +359,16 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should error when type is undefined and cannot be inferred', async (t) => {
-    t.plan(1)
-
+  test('should error when type is undefined and cannot be inferred', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
       resolvers
     })
 
-    t.rejects(app.register(mercuriusValidation, {
+    await t.assert.rejects(async () => app.register(mercuriusValidation, {
       schema: {
         Filters: {
           id: { minLength: 1 }
@@ -390,11 +377,9 @@ t.test('JSON Schema validators', t => {
     }), new MER_VALIDATION_ERR_FIELD_TYPE_UNDEFINED('https://mercurius.dev/validation/Filters/id'))
   })
 
-  t.test('should protect schema list scalar types and error accordingly', async t => {
-    t.plan(1)
-
+  test('should protect schema list scalar types and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -431,7 +416,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -492,11 +477,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should protect schema list input object types and error accordingly', async t => {
-    t.plan(1)
-
+  test('should protect schema list input object types and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -532,7 +515,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -593,12 +576,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should protect schema non-null types and error accordingly', async t => {
-    t.plan(1)
-
+  test('should protect schema non-null types and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     const schema = `
       type Message {
         id: ID!
@@ -680,7 +660,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null,
         messages: null
@@ -828,12 +808,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should protect schema fields that have arguments but no associated resolver', async t => {
-    t.plan(1)
-
+  test('should protect schema fields that have arguments but no associated resolver', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
@@ -859,7 +836,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         noResolver: null
       },
@@ -902,11 +879,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should protect at the input object type level and error accordingly', async t => {
-    t.plan(1)
-
+  test('should protect at the input object type level and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema,
@@ -936,7 +911,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -986,12 +961,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should protect at the input object type level alongside existing field validations and error accordingly', async t => {
-    t.plan(1)
-
+  test('should protect at the input object type level alongside existing field validations and error accordingly', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
@@ -1021,7 +993,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         messages: null
       },
@@ -1090,12 +1062,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should coerce types by default on scalar types', async (t) => {
-    t.plan(1)
-
+  test('should coerce types by default on scalar types', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
@@ -1124,7 +1093,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -1166,11 +1135,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should infer types for String scalar types', async (t) => {
-    t.plan(1)
-
+  test('should infer types for String scalar types', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     const schema = `
       type Message {
@@ -1249,7 +1216,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null,
         messages: null
@@ -1402,12 +1369,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should infer types for Int scalar types', async (t) => {
-    t.plan(1)
-
+  test('should infer types for Int scalar types', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     const schema = `
       type Message {
         text: String
@@ -1485,7 +1449,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null,
         messages: null
@@ -1643,12 +1607,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should infer types for Float scalar types', async (t) => {
-    t.plan(1)
-
+  test('should infer types for Float scalar types', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     const schema = `
       type Message {
         text: String
@@ -1726,7 +1687,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null,
         messages: null
@@ -1884,12 +1845,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should support additional AJV options', async t => {
-    t.plan(1)
-
+  test('should support additional AJV options', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
@@ -1921,7 +1879,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -1964,12 +1922,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should support custom errors', async t => {
-    t.plan(1)
-
+  test('should support custom errors', async t => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema,
       resolvers
@@ -2001,7 +1956,7 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         message: null
       },
@@ -2070,12 +2025,9 @@ t.test('JSON Schema validators', t => {
     })
   })
 
-  t.test('should support nullable input type arguments', async (t) => {
-    t.plan(1)
-
+  test('should support nullable input type arguments', async (t) => {
     const app = Fastify()
-    t.teardown(app.close.bind(app))
-
+    t.after(() => app.close())
     app.register(mercurius, {
       schema: `
       input TestObject {
@@ -2121,14 +2073,14 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(response.json(), {
+    t.assert.deepStrictEqual(response.json(), {
       data: {
         nullableInput: null
       }
     })
   })
 
-  t.test('should invoke customTypeInferenceFn option and not affect operations when everything is okay', async (t) => {
+  test('should invoke customTypeInferenceFn option and not affect operations when everything is okay', async (t) => {
     const productSchema = `
       type Product {
         id: ID!
@@ -2181,7 +2133,7 @@ t.test('JSON Schema validators', t => {
     }
 
     const app = Fastify()
-    t.teardown(app.close.bind(app))
+    t.after(() => app.close())
 
     app.register(mercurius, {
       schema: productSchema,
@@ -2225,21 +2177,21 @@ t.test('JSON Schema validators', t => {
       body: JSON.stringify({ query })
     })
 
-    t.same(JSON.parse(response.body), {
+    t.assert.deepStrictEqual(JSON.parse(response.body), {
       data: {
         product: {
-          id: 1,
+          id: '1',
           text: 'Laptop',
           isAvailable: true
         },
         products: [
           {
-            id: 0,
+            id: '0',
             text: 'Phone',
             isAvailable: true
           },
           {
-            id: 1,
+            id: '1',
             text: 'Laptop',
             isAvailable: true
           }
