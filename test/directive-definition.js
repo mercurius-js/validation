@@ -1,31 +1,23 @@
 'use strict'
 
-const t = require('tap')
+const { describe, test } = require('node:test')
 const { parse, GraphQLSchema, extendSchema, buildSchema } = require('graphql')
 const { graphQLTypeDefs } = require('..')
 
-t.test('directive', t => {
-  t.plan(1)
-
-  t.test('validationTypeDefs', t => {
-    t.plan(2)
-
-    t.test('should be a valid GraphQL type definition', t => {
-      t.plan(1)
-
+describe('directive', () => {
+  describe('validationTypeDefs', () => {
+    test('should be a valid GraphQL type definition', t => {
       parse(graphQLTypeDefs)
-      t.ok('Valid GraphQL type definition')
+      t.assert.ok('Valid GraphQL type definition')
     })
 
-    t.test('should be able to extend an existing executable schema', t => {
-      t.plan(1)
-
+    test('should be able to extend an existing executable schema', t => {
       const graphQLSchemaToExtend = buildSchema(`
         type Query {
           message(id: ID @constraint(wrong: String)): String
         }
       `, { assumeValid: true })
-      t.type(extendSchema(graphQLSchemaToExtend, parse(graphQLTypeDefs)), GraphQLSchema)
+      t.assert.strictEqual(extendSchema(graphQLSchemaToExtend, parse(graphQLTypeDefs)).constructor.name, GraphQLSchema.name)
     })
   })
 })
