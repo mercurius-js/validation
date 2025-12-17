@@ -63,7 +63,8 @@ describe('gateway refresh', () => {
   test('polling interval with a new schema should trigger refresh of schema policy build', async t => {
     const clock = FakeTimers.install({
       shouldAdvanceTime: true,
-      advanceTimeDelta: 40
+      advanceTimeDelta: 40,
+      toFake: ['setInterval', 'clearInterval']
     })
     t.after(() => clock.uninstall())
 
