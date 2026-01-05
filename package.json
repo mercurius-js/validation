@@ -40,7 +40,7 @@
     "@types/node": "^25.0.2",
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^5.30.3",
-    "@typescript-eslint/parser": "^5.30.3",
+    "@typescript-eslint/parser": "^8.51.0",
     "autocannon": "^8.0.0",
     "borp": "^0.21.0",
     "concurrently": "^9.0.0",
