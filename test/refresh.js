@@ -195,12 +195,14 @@ describe('gateway refresh', () => {
     messageService.graphql.replaceSchema(buildFederationSchema(newSchema))
     messageService.graphql.defineResolvers(resolvers)
 
-    await clock.tickAsync(2000)
+    // Tick past the polling interval and allow async operations to settle
+    await clock.tickAsync(3000)
 
-    // We need the event loop to actually spin twice to
+    // We need the event loop to actually spin multiple times to
     // be able to propagate the change
-    await immediate()
-    await immediate()
+    for (let i = 0; i < 10; i++) {
+      await immediate()
+    }
 
     {
       const res = await gateway.inject({
