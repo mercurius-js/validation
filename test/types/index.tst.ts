@@ -1,12 +1,16 @@
-import { expectType } from 'tsd'
 import fastify from 'fastify'
 import { GraphQLDirective, GraphQLResolveInfo } from 'graphql'
 import { MercuriusContext } from 'mercurius'
-import mercuriusValidation, { MercuriusValidationHandler, MercuriusValidationHandlerMetadata, MercuriusValidationOptions } from '../..'
+import { expect } from 'tstyche'
+import mercuriusValidation, {
+  MercuriusValidationHandler,
+  MercuriusValidationHandlerMetadata,
+  MercuriusValidationOptions
+} from '../..'
 
 // Validate GraphQL definitions
-expectType<string>(mercuriusValidation.graphQLTypeDefs)
-expectType<GraphQLDirective>(mercuriusValidation.graphQLDirective)
+expect(mercuriusValidation.graphQLTypeDefs).type.toBe<string>()
+expect(mercuriusValidation.graphQLDirective).type.toBe<GraphQLDirective>()
 
 const app = fastify()
 
@@ -67,19 +71,19 @@ app.register(mercuriusValidation, {
     Query: {
       message: {
         async id (metadata, value, parent, args, context, info) {
-          expectType<MercuriusValidationHandlerMetadata>(metadata)
-          expectType<any>(value)
-          expectType<any>(parent)
-          expectType<any>(args)
-          expectType<MercuriusContext>(context)
-          expectType<GraphQLResolveInfo>(info)
+          expect(metadata).type.toBe<MercuriusValidationHandlerMetadata>()
+          expect(value).type.toBe<any>()
+          expect(parent).type.toBe<any>()
+          expect(args).type.toBe<any>()
+          expect(context).type.toBe<MercuriusContext>()
+          expect(info).type.toBe<GraphQLResolveInfo>()
         }
       }
     }
   }
 })
 
-// Using options as object without generics
+// Custom types for testing generics
 interface CustomParent {
   parent: Record<string, any>;
 }
@@ -89,6 +93,7 @@ interface CustomArgs {
 interface CustomContext extends MercuriusContext {
   hello?: string;
 }
+
 const validationOptions: MercuriusValidationOptions = {
   schema: {
     Query: {
@@ -101,13 +106,12 @@ const validationOptions: MercuriusValidationOptions = {
           context: CustomContext,
           info
         ) {
-          expectType<MercuriusValidationHandlerMetadata>(metadata)
-          expectType<any>(value)
-          expectType<CustomParent>(parent)
-          expectType<CustomArgs>(args)
-          expectType<CustomContext>(context)
-          expectType<string | undefined>(context?.hello)
-          expectType<GraphQLResolveInfo>(info)
+          expect(metadata).type.toBe<MercuriusValidationHandlerMetadata>()
+          expect(value).type.toBe<any>()
+          expect(parent).type.toBe<CustomParent>()
+          expect(args).type.toBe<CustomArgs>()
+          expect(context).type.toBe<CustomContext>()
+          expect(info).type.toBe<GraphQLResolveInfo>()
         }
       }
     }
@@ -115,19 +119,20 @@ const validationOptions: MercuriusValidationOptions = {
 }
 app.register(mercuriusValidation, validationOptions)
 
-// Using options as input object with generics
+// Using options as input object with generics - explicit type parameters
 const authOptionsWithGenerics: MercuriusValidationOptions<CustomParent, CustomArgs, CustomContext> = {
   schema: {
     Query: {
       message: {
         async id (metadata, value, parent, args, context, info) {
-          expectType<MercuriusValidationHandlerMetadata>(metadata)
-          expectType<any>(value)
-          expectType<CustomParent>(parent)
-          expectType<CustomArgs>(args)
-          expectType<CustomContext>(context)
-          expectType<string | undefined>(context?.hello)
-          expectType<GraphQLResolveInfo>(info)
+          // With generics, types are correctly inferred as custom types
+          expect(metadata).type.toBe<MercuriusValidationHandlerMetadata>()
+          expect(value).type.toBe<any>()
+          expect(parent).type.toBe<CustomParent>()
+          expect(args).type.toBe<CustomArgs>()
+          expect(context).type.toBe<CustomContext>()
+          expect(context?.hello).type.toBe<string | undefined>()
+          expect(info).type.toBe<GraphQLResolveInfo>()
         }
       }
     }
@@ -135,16 +140,18 @@ const authOptionsWithGenerics: MercuriusValidationOptions<CustomParent, CustomAr
 }
 app.register(mercuriusValidation, authOptionsWithGenerics)
 
-// Creating functions using handler types
+// Creating functions using handler types - infer from generic
 const id: MercuriusValidationHandler<{}, {}, CustomContext> =
   async (metadata, value, parent, args, context, info) => {
-    expectType<MercuriusValidationHandlerMetadata>(metadata)
-    expectType<any>(value)
-    expectType<{}>(parent)
-    expectType<{}>(args)
-    expectType<CustomContext>(context)
-    expectType<GraphQLResolveInfo>(info)
-    expectType<string | undefined>(context?.hello)
+    // Parent and args are intentionally the empty-object type `{}` to verify
+    // the generic propagates exactly as declared — not narrowed or widened.
+    expect(metadata).type.toBe<MercuriusValidationHandlerMetadata>()
+    expect(value).type.toBe<any>()
+    expect(parent).type.toBe<{}>()
+    expect(args).type.toBe<{}>()
+    expect(context).type.toBe<CustomContext>()
+    expect(context?.hello).type.toBe<string | undefined>()
+    expect(info).type.toBe<GraphQLResolveInfo>()
   }
 app.register(mercuriusValidation, {
   schema: {
